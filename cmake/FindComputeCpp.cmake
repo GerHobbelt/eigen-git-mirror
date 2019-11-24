@@ -256,11 +256,11 @@ function(add_sycl_to_target targetName binaryDir sourceFiles)
   # Add custom target to run compute++ and generate the integration header
   foreach(sourceFile ${sourceFiles})
     __build_spir(${targetName} ${sourceFile} ${binaryDir} ${fileCounter})
-    MATH(EXPR fileCounter "${fileCounter} + 1")
+    math(EXPR fileCounter "${fileCounter} + 1")
   endforeach()
 
   # Link with the ComputeCpp runtime library
   target_link_libraries(${targetName} PUBLIC ${COMPUTECPP_RUNTIME_LIBRARY}
                         PUBLIC ${OpenCL_LIBRARIES})
 
-endfunction(add_sycl_to_target)
+endfunction()
