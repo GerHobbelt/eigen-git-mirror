@@ -68,10 +68,9 @@ struct selfadjoint_product_selector<MatrixType,OtherType,UpLo,true>
 
     ei_declare_aligned_stack_constructed_variable(Scalar, actualOtherPtr, other.size(),
       (UseOtherDirectly ? const_cast<Scalar*>(actualOther.data()) : static_other.data()));
-    
-    //TODO: What is this used for???
-    //if(!UseOtherDirectly)
-    //  Map<typename _ActualOtherType::PlainObject>(actualOtherPtr, actualOther.size()) = actualOther;
+      
+    if(!UseOtherDirectly)
+      Map<typename _ActualOtherType::PlainObject>(actualOtherPtr, actualOther.size()) = actualOther;
     
     selfadjoint_rank1_update<Scalar,Index,StorageOrder,UpLo,
                               OtherBlasTraits::NeedToConjugate  && NumTraits<Scalar>::IsComplex,
