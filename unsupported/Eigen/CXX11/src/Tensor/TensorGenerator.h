@@ -10,6 +10,7 @@
 #ifndef EIGEN_CXX11_TENSOR_TENSOR_GENERATOR_H
 #define EIGEN_CXX11_TENSOR_TENSOR_GENERATOR_H
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -265,11 +266,6 @@ struct TensorEvaluator<const TensorGeneratorOp<Generator, ArgType>, Device>
   }
 
   EIGEN_DEVICE_FUNC EvaluatorPointerType  data() const { return NULL; }
-
-#ifdef EIGEN_USE_SYCL
-  // binding placeholder accessors to a command group handler for SYCL
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void bind(cl::sycl::handler&) const {}
-#endif
 
  protected:
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE

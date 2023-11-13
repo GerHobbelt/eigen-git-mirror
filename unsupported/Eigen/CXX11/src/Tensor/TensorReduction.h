@@ -21,6 +21,7 @@
 #endif
 #endif
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -270,7 +271,7 @@ struct InnerMostDimReducer<Self, Op, true, true> {
       // Make sure the split point is aligned on a packet boundary.
       const typename Self::Index split =
           packetSize *
-          divup(firstIndex + divup(numValuesToReduce, typename Self::Index(2)),
+          numext::div_ceil(firstIndex + numext::div_ceil(numValuesToReduce, typename Self::Index(2)),
                 packetSize);
       const typename Self::Index num_left =
           numext::mini(split - firstIndex, numValuesToReduce);
@@ -603,8 +604,10 @@ static constexpr bool RunningOnGPU = false;
   static constexpr bool RunningFullReduction = (NumOutputDims==0);
 
   EIGEN_STRONG_INLINE TensorReductionEvaluatorBase(const XprType& op, const Device& device)
-      : m_impl(op.expression(), device), m_reducer(op.reducer()), m_result(NULL), m_device(device)
-  {
+      : m_impl(op.expression(), device),
+        m_reducer(op.reducer()),
+        m_result(NULL),
+        m_device(device) {
     EIGEN_STATIC_ASSERT((NumInputDims >= NumReducedDims), YOU_MADE_A_PROGRAMMING_MISTAKE);
     EIGEN_STATIC_ASSERT((!ReducingInnerMostDims | !PreservingInnerMostDims | (NumReducedDims == NumInputDims)),
                         YOU_MADE_A_PROGRAMMING_MISTAKE);
@@ -891,13 +894,6 @@ static constexpr bool RunningOnGPU = false;
   EIGEN_DEVICE_FUNC EvaluatorPointerType data() const { return m_result; }
   EIGEN_DEVICE_FUNC const TensorEvaluator<ArgType, Device>& impl() const { return m_impl; }
   EIGEN_DEVICE_FUNC const Device& device() const { return m_device; }
-#ifdef EIGEN_USE_SYCL
-  // binding placeholder accessors to a command group handler for SYCL
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void bind(cl::sycl::handler &cgh) const {
-    m_impl.bind(cgh);
-    m_result.bind(cgh);
-  }
-#endif
 
   private:
   template <int, typename, typename> friend struct internal::GenericDimReducer;

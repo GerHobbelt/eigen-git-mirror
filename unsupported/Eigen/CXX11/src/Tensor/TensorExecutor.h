@@ -10,6 +10,7 @@
 #ifndef EIGEN_CXX11_TENSOR_TENSOR_EXECUTOR_H
 #define EIGEN_CXX11_TENSOR_TENSOR_EXECUTOR_H
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -94,9 +95,8 @@ class TensorExecutor {
                 "You must #define EIGEN_USE_THREADS, EIGEN_USE_GPU or "
                 "EIGEN_USE_SYCL before including Eigen headers.");
 
-  EIGEN_DEVICE_FUNC
   static EIGEN_STRONG_INLINE void run(const Expression& expr,
-                                      const Device& device = Device()) {
+                                      const Device& device = DefaultDevice()) {
     TensorEvaluator<Expression, Device> evaluator(expr, device);
     const bool needs_assign = evaluator.evalSubExprsIfNeeded(NULL);
     if (needs_assign) {
@@ -126,7 +126,6 @@ class TensorExecutor<Expression, DefaultDevice, /*Vectorizable=*/true,
  public:
   typedef typename Expression::Index StorageIndex;
 
-  EIGEN_DEVICE_FUNC
   static EIGEN_STRONG_INLINE void run(
       const Expression& expr, const DefaultDevice& device = DefaultDevice()) {
     TensorEvaluator<Expression, DefaultDevice> evaluator(expr, device);
@@ -262,7 +261,7 @@ TensorExecutorTilingContext<TensorBlockMapper> GetTensorExecutorTilingContext(
   const size_t align = numext::maxi(EIGEN_MAX_ALIGN_BYTES, 1);
   const size_t aligned_blocksize =
       align *
-      divup<size_t>(block_size * sizeof(typename Evaluator::Scalar), align);
+      numext::div_ceil<size_t>(block_size * sizeof(typename Evaluator::Scalar), align);
 
   return {block_mapper, requirements.cost_per_coeff * block_size,
           aligned_blocksize};
@@ -656,13 +655,11 @@ EIGEN_STRONG_INLINE void TensorExecutor<Expression, GpuDevice, Vectorizable, Til
 
     const int block_size = device.maxGpuThreadsPerBlock();
     const int max_blocks =
-        numext::mini<int64_t>(device.getNumGpuMultiProcessors() *
-                              device.maxGpuThreadsPerMultiProcessor(),
-                          NumTraits<StorageIndex>::highest()) /
-        block_size;
+        static_cast<int>(numext::mini<int64_t>(device.getNumGpuMultiProcessors() * device.maxGpuThreadsPerMultiProcessor(),
+                                               NumTraits<StorageIndex>::highest()) / block_size);
     const StorageIndex size = array_prod(evaluator.dimensions());
     // Create a least one block to ensure we won't crash when tensorflow calls with tensors of size 0.
-    const int num_blocks = numext::maxi<int>(numext::mini<int>(max_blocks, divup<int>(size, block_size)), 1);
+    const int num_blocks = numext::maxi<int>(numext::mini<int>(max_blocks, static_cast<int>(numext::div_ceil<StorageIndex>(size, block_size))), 1);
 
     LAUNCH_GPU_KERNEL(
         (EigenMetaKernel<TensorEvaluator<Expression, GpuDevice>, StorageIndex>),
@@ -688,12 +685,12 @@ struct ExecExprFunctorKernel {
       : evaluator(evaluator_), range(range_) {}
 
   EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE void operator()(
-      cl::sycl::nd_item<1> itemID) {
+      cl::sycl::nd_item<1> itemID) const {
     compute(itemID);
   }
   template <bool is_vec = Evaluator::PacketAccess>
   EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE std::enable_if_t<!is_vec>
-  compute(const cl::sycl::nd_item<1>& itemID) {
+  compute(const cl::sycl::nd_item<1>& itemID) const {
     Index gId = static_cast<Index>(itemID.get_global_linear_id());
     Index total_threads = itemID.get_global_range(0);
 
@@ -703,7 +700,7 @@ struct ExecExprFunctorKernel {
   }
   template <bool is_vec = Evaluator::PacketAccess>
   EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE std::enable_if_t<is_vec>
-  compute(const cl::sycl::nd_item<1>& itemID) {
+  compute(const cl::sycl::nd_item<1>& itemID) const {
     const Index vectorizedRange =
         (range / Evaluator::PacketSize) * Evaluator::PacketSize;
     Index gId = static_cast<Index>(itemID.get_global_linear_id());
@@ -745,7 +742,7 @@ class TensorExecutor<Expression, Eigen::SyclDevice, Vectorizable, Tiling> {
           evaluator,
           cl::sycl::nd_range<1>(cl::sycl::range<1>(GRange),
                                 cl::sycl::range<1>(tileSize)),
-          Index(1), range);
+          Index(1), range).wait();
     }
     evaluator.cleanup();
   }

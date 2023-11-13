@@ -19,6 +19,7 @@
 #ifndef EIGEN_CXX11_TENSOR_TENSOR_CONTRACTION_SYCL_H
 #define EIGEN_CXX11_TENSOR_TENSOR_CONTRACTION_SYCL_H
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -597,7 +598,7 @@ class TensorContractionKernel {
                                                                 const TripleDim triple_dim_)
       : TensorContractionKernel(scratch_, lhs_, rhs_, out_res_, groupSizeM_, 1, numTiles_, triple_dim_) {}
 
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void operator()(cl::sycl::nd_item<1> itemID) {
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void operator()(cl::sycl::nd_item<1> itemID) const {
     const StorageIndex linearLocalThreadId = itemID.get_local_id(0);
     const StorageIndex nLocalThreadId = linearLocalThreadId / Properties::LocalThreadSizeM;
     const StorageIndex mLocalThreadId = linearLocalThreadId % Properties::LocalThreadSizeM;
@@ -627,7 +628,7 @@ class TensorContractionKernel {
         ThreadProperties<StorageIndex>(linearLocalThreadId, kGroupId, mGroupOffset, nGroupOffset, kGroupOffset,
                                        mLocalOffset, nLocalOffset, mGlobalOffset, nGlobalOffset, kSize, is_internal);
 
-    auto out_ptr = out_res.get_pointer() + (IsFinal ? 0 : thread_properties.kGroupId * triple_dim.M * triple_dim.N);
+    auto out_ptr = out_res + (IsFinal ? 0 : thread_properties.kGroupId * triple_dim.M * triple_dim.N);
 
     (thread_properties.is_internal) ? compute_panel<true>(itemID, thread_properties, out_ptr)
                                     : compute_panel<false>(itemID, thread_properties, out_ptr);
@@ -636,7 +637,7 @@ class TensorContractionKernel {
   // privateRes memory of Each computation the compute block function is independent of local and no local concepts as
   // it only compute the block on each thread's private memory space
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void compute_block_per_tile(OutScalar *lhs_block_ptr, OutScalar *rhs_block_ptr,
-                                                                    PacketReturnType *privateRes) {
+                                                                    PacketReturnType *privateRes) const {
     StorageIndex idx = 0;
     EIGEN_CONSTEXPR StorageIndex lhs_stride =
         contraction_tp == contraction_type::local ? (PacketSize * Properties::LocalThreadSizeM) : 1;
@@ -661,7 +662,7 @@ class TensorContractionKernel {
   // class.
   template <bool is_internal_block, StorageIndex PrivateNStride, typename OutPtr>
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void store(OutPtr *out_ptr, PacketReturnType *privateRes,
-                                                   StorageIndex mGlobalOffset, StorageIndex nGlobalOffset) {
+                                                   StorageIndex mGlobalOffset, StorageIndex nGlobalOffset) const {
     auto chk_bound = [&](const StorageIndex &mIndex, const StorageIndex &nIndex) EIGEN_DEVICE_FUNC {
       return (mIndex + PacketSize - 1 < triple_dim.M && nGlobalOffset + nIndex < triple_dim.N);
     };
@@ -713,7 +714,7 @@ class TensorContractionKernel {
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
       std::enable_if_t<contract_tp == contraction_type::no_local>
       extract_block(const Input &inpt, PrivateReg private_ptr, const std::pair<StorageIndex, StorageIndex> &,
-                    const StorageIndex &ncOffset, const StorageIndex cOffset) {
+                    const StorageIndex &ncOffset, const StorageIndex cOffset) const {
     EIGEN_CONSTEXPR StorageIndex LocalThreadSizeNC =
         InputBlockProperties::is_rhs ? Properties::LocalThreadSizeN : Properties::LocalThreadSizeM;
     EIGEN_CONSTEXPR StorageIndex WorkLoadPerThreadNC =
@@ -833,7 +834,8 @@ class TensorContractionKernel {
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void compute_tile_per_panel(const cl::sycl::nd_item<1> &itemID,
                                                                     ThreadProperties<StorageIndex> &thread_properties,
                                                                     TiledMemory &tiled_input_block,
-                                                                    PacketReturnType *privateRes, bool &db_offset) {
+                                                                    PacketReturnType *privateRes, bool &db_offset) const {
+
     // Tiling the Rhs block from global to local memory
     extract_block<RHSBlockProperties, is_internal_block>(
         rhs, tiled_input_block.rhs_scratch_extract.ptr + (db_offset * Properties::TileSizeDimK * LSDR),
@@ -871,7 +873,7 @@ class TensorContractionKernel {
   template <bool is_internal_block, typename OutPtr>
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void compute_panel(const cl::sycl::nd_item<1> &itemID,
                                                            ThreadProperties<StorageIndex> &thread_properties,
-                                                           OutPtr out_ptr) {
+                                                           OutPtr out_ptr) const {
     auto tiled_input_block = TiledMemory{thread_properties, scratch.get_pointer()};
     // Allocate register space
     PacketReturnType privateRes[Properties::WorkLoadPerThreadM * Properties::WorkLoadPerThreadN / PacketSize] = {
@@ -897,7 +899,7 @@ class TensorContractionKernel {
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
       std::enable_if_t<contract_tp == contraction_type::local>
       extract_block(const Input &inpt, Local local_ptr, const std::pair<StorageIndex, StorageIndex>& local_index,
-                    const StorageIndex &ncOffset, const StorageIndex cOffset) {
+                    const StorageIndex &ncOffset, const StorageIndex cOffset) const {
     EIGEN_CONSTEXPR StorageIndex TileSizeDimNC =
         InputBlockProperties::is_rhs ? Properties::TileSizeDimN : Properties::TileSizeDimM;
     EIGEN_CONSTEXPR StorageIndex LoadPerThread =
@@ -1035,7 +1037,7 @@ struct GeneralVectorTensor {
         nonContractDim(nonContractDim_),
         contractDim(contractDim_) {}
 
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void operator()(cl::sycl::nd_item<1> itemID) {
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void operator()(cl::sycl::nd_item<1> itemID) const {
     auto scratch_ptr = scratch.get_pointer();
     const StorageIndex linearLocalThreadId = itemID.get_local_id(0);
     StorageIndex nonContractId = is_lhs_vec ? linearLocalThreadId / Properties::LocalThreadSizeC
@@ -1047,7 +1049,7 @@ struct GeneralVectorTensor {
         is_lhs_vec ? itemID.get_group(0) / cGroupSize : itemID.get_group(0) % nonContractGroupSize;
     const StorageIndex contractGroupId =
         is_lhs_vec ? itemID.get_group(0) % cGroupSize : itemID.get_group(0) / nonContractGroupSize;
-    auto out_ptr = out_res.get_pointer() + (IsFinal ? 0 : contractGroupId * nonContractDim);
+    auto out_ptr = out_res + (IsFinal ? 0 : contractGroupId * nonContractDim);
 
     const StorageIndex nonContractGroupOffset = nonContractGroupId * Properties::TileSizeDimNC;
     const StorageIndex contractGroupOffset = contractGroupId * Properties::TileSizeDimC;
@@ -1116,7 +1118,7 @@ struct GeneralVectorTensor {
                                               : globalContractDimOffset + privateOffsetC)
                              : OutScalar(0);
 
-        outScalar[j] = cl::sycl::mad(matScalar, vecScalar, outScalar[j]);
+        outScalar[j] = ::Eigen::internal::pmadd(matScalar, vecScalar, outScalar[j]);
         privateOffsetNC += Properties::LocalThreadSizeNC;
       }
       privateOffsetC += Properties::LocalThreadSizeC;
@@ -1252,15 +1254,16 @@ struct GeneralScalarContraction {
                            const StorageIndex rng_)
       : scratch(scratch_), lhs(lhs_), rhs(rhs_), out_res(out_res_), rng(rng_) {}
 
-  EIGEN_DEVICE_FUNC void operator()(cl::sycl::nd_item<1> itemID) {
-    auto out_ptr = out_res.get_pointer();
-    auto scratch_ptr = scratch.get_pointer().get();
+  EIGEN_DEVICE_FUNC void operator()(cl::sycl::nd_item<1> itemID) const {
+
+    auto out_ptr = out_res;
+    OutScalar * scratch_ptr = scratch.get_pointer();
 
     StorageIndex globalid = itemID.get_global_id(0);
     StorageIndex localid = itemID.get_local_id(0);
     OutScalar accumulator = OutScalar(0);
     for (StorageIndex i = globalid; i < rng; i += itemID.get_global_range(0)) {
-      accumulator = cl::sycl::mad(lhs(0, i), rhs(i, 0), accumulator);
+      accumulator = Eigen::internal::pmadd(lhs(0, i), rhs(i, 0), accumulator);
     }
     auto out_scratch_ptr = scratch_ptr + localid;
     *out_scratch_ptr = accumulator;
@@ -1393,13 +1396,13 @@ struct TensorEvaluator<const TensorContractionOp<Indices, LeftArgType, RightArgT
     const auto triple_dim = TripleDim{this->m_i_size, this->m_j_size, this->m_k_size};
     typedef internal::TensorContractionInputMapper<
         LhsScalar, StorageIndex, internal::Lhs, LeftEvaluator, left_nocontract_t, contract_t,
-        PacketType<CoeffReturnType, Device>::size, lhs_inner_dim_contiguous, false, Unaligned, MakeSYCLPointer>
+        PacketType<CoeffReturnType, Device>::size, lhs_inner_dim_contiguous, false, Unaligned, MakePointer>
         LhsMapper;
 
     typedef internal::TensorContractionInputMapper<RhsScalar, StorageIndex, internal::Rhs, RightEvaluator,
                                                    right_nocontract_t, contract_t,
                                                    PacketType<CoeffReturnType, Device>::size, rhs_inner_dim_contiguous,
-                                                   rhs_inner_dim_reordered, Unaligned, MakeSYCLPointer>
+                                                   rhs_inner_dim_reordered, Unaligned, MakePointer>
         RhsMapper;
 
     // initialize data mappers
@@ -1503,8 +1506,8 @@ struct TensorEvaluator<const TensorContractionOp<Indices, LeftArgType, RightArgT
                                                             LhsMapper, RhsMapper, StorageIndex, Properties, TripleDim,
                                                             PacketAccess, input_mapper_properties, true, ct>
           ContractKernelName;
-      device().template binary_kernel_launcher<CoeffReturnType, ContractKernelName>(
-          lhs, rhs, buffer, thread_range, scratchSize, groupSizeM, groupSizeN, numTilesPerGroup, triple_dim);
+       device().template binary_kernel_launcher<CoeffReturnType, ContractKernelName>(
+          lhs, rhs, buffer, thread_range, scratchSize, groupSizeM, groupSizeN, numTilesPerGroup, triple_dim).wait();
     } else {
       typedef TensorSycl::internal::TensorContractionKernel<CoeffReturnType, LhsScalar, RhsScalar, EvaluatorPointerType,
                                                             LhsMapper, RhsMapper, StorageIndex, Properties, TripleDim,
@@ -1516,7 +1519,7 @@ struct TensorEvaluator<const TensorContractionOp<Indices, LeftArgType, RightArgT
 
       device().template binary_kernel_launcher<CoeffReturnType, ContractKernelName>(
           lhs, rhs, tmp_global_accessor, thread_range, scratchSize, groupSizeM, groupSizeN, numTilesPerGroup,
-          triple_dim);
+          triple_dim).wait();
 
       typedef Eigen::internal::SumReducer<CoeffReturnType> Op;
       auto op = Op();
@@ -1529,8 +1532,7 @@ struct TensorEvaluator<const TensorContractionOp<Indices, LeftArgType, RightArgT
           cl::sycl::nd_range<1>(cl::sycl::range<1>(StorageIndex(
                                     Eigen::TensorSycl::internal::roundUp(triple_dim.M * triple_dim.N, localRange))),
                                 cl::sycl::range<1>(localRange)),
-          StorageIndex(1), op, StorageIndex(triple_dim.M * triple_dim.N), groupSizeK);
-
+          StorageIndex(1), op, StorageIndex(triple_dim.M * triple_dim.N), groupSizeK).wait();
       device().deallocate_temp(temp_pointer);
     }
   }
@@ -1564,28 +1566,28 @@ struct TensorEvaluator<const TensorContractionOp<Indices, LeftArgType, RightArgT
           static_cast<CoeffReturnType *>(device().allocate_temp(nonContractDim * cNumGroups * sizeof(CoeffReturnType)));
       EvaluatorPointerType tmp_global_accessor = device().get(temp_pointer);
 
-      device().template binary_kernel_launcher<CoeffReturnType, ContractKernelName>(
-          vec, mat, tmp_global_accessor, thread_range, scratchSize, nCNumGroups, nonContractDim, C);
+     device().template binary_kernel_launcher<CoeffReturnType, ContractKernelName>(
+          vec, mat, tmp_global_accessor, thread_range, scratchSize, nCNumGroups, nonContractDim, C).wait();
 
       typedef Eigen::internal::SumReducer<CoeffReturnType> Op;
       typedef TensorSycl::internal::SecondStepPartialReduction<CoeffReturnType, StorageIndex, EvaluatorPointerType,
                                                                EvaluatorPointerType, Op>
           ReductionKernel;
 
-      device().template unary_kernel_launcher<CoeffReturnType, ReductionKernel>(
+     device().template unary_kernel_launcher<CoeffReturnType, ReductionKernel>(
           tmp_global_accessor, buffer,
           cl::sycl::nd_range<1>(cl::sycl::range<1>(Eigen::TensorSycl::internal::roundUp(nonContractDim, localRange)),
                                 cl::sycl::range<1>(localRange)),
-          StorageIndex(1), Op(), nonContractDim, cNumGroups);
-
+          StorageIndex(1), Op(), nonContractDim, cNumGroups).wait();   
       device().deallocate_temp(temp_pointer);
     } else {
       typedef Eigen::TensorSycl::internal::GeneralVectorTensor<CoeffReturnType, EvaluatorPointerType, VectorMapper,
                                                                TensorMapper, StorageIndex, Properties, CFactor, false,
                                                                is_lhs_vec, true>
           ContractKernelName;
-      device().template binary_kernel_launcher<CoeffReturnType, ContractKernelName>(
-          vec, mat, buffer, thread_range, scratchSize, nCNumGroups, nonContractDim, C);
+     device().template binary_kernel_launcher<CoeffReturnType, ContractKernelName>(
+          vec, mat, buffer, thread_range, scratchSize, nCNumGroups, nonContractDim, C).wait();
+   
     }
   }
 #endif
@@ -1614,19 +1616,18 @@ struct TensorEvaluator<const TensorContractionOp<Indices, LeftArgType, RightArgT
           static_cast<CoeffReturnType *>(device().allocate_temp(num_work_group * sizeof(CoeffReturnType)));
       EvaluatorPointerType tmp_global_accessor = device().get(temp_pointer);
       device().template binary_kernel_launcher<CoeffReturnType, ContractKernelName>(lhs, rhs, tmp_global_accessor,
-                                                                                    thread_range, local_range, K);
+                                                                                    thread_range, local_range, K).wait();
       typedef Eigen::internal::SumReducer<CoeffReturnType> Op;
       typedef TensorSycl::internal::SecondStepFullReducer<CoeffReturnType, Op, EvaluatorPointerType,
                                                           EvaluatorPointerType, StorageIndex, local_range>
           GenericRKernel;
       device().template unary_kernel_launcher<CoeffReturnType, GenericRKernel>(
           tmp_global_accessor, buffer,
-          cl::sycl::nd_range<1>(cl::sycl::range<1>(local_range), cl::sycl::range<1>(local_range)), local_range, Op());
-
+          cl::sycl::nd_range<1>(cl::sycl::range<1>(local_range), cl::sycl::range<1>(local_range)), local_range, Op()).wait();
       device().deallocate_temp(temp_pointer);
     } else {
       device().template binary_kernel_launcher<CoeffReturnType, ContractKernelName>(lhs, rhs, buffer, thread_range,
-                                                                                    local_range, K);
+                                                                                    local_range, K).wait();
     }
   }
 #endif
@@ -1639,12 +1640,6 @@ struct TensorEvaluator<const TensorContractionOp<Indices, LeftArgType, RightArgT
       this->m_device.deallocate_temp(this->m_result);
       this->m_result = NULL;
     }
-  }
-  // The placeholder accessors must bound to a command group handler for SYCL
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void bind(cl::sycl::handler &cgh) const {
-    this->m_leftImpl.bind(cgh);
-    this->m_rightImpl.bind(cgh);
-    this->m_result.bind(cgh);
   }
 };
 }  // namespace Eigen

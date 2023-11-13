@@ -10,6 +10,7 @@
 #ifndef EIGEN_INDEXED_VIEW_H
 #define EIGEN_INDEXED_VIEW_H
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -93,7 +94,6 @@ class IndexedViewImpl;
   *  - std::vector<int>
   *  - std::valarray<int>
   *  - std::array<int>
-  *  - Plain C arrays: int[N]
   *  - Eigen::ArrayXi
   *  - decltype(ArrayXi::LinSpaced(...))
   *  - Any view/expressions of the previous types

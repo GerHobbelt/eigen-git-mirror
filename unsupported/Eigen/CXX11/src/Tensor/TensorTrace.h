@@ -11,6 +11,7 @@
 #ifndef EIGEN_CXX11_TENSOR_TENSOR_TRACE_H
 #define EIGEN_CXX11_TENSOR_TENSOR_TRACE_H
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -255,13 +256,6 @@ struct TensorEvaluator<const TensorTraceOp<Dims, ArgType>, Device>
     PacketReturnType result = internal::ploadt<PacketReturnType, LoadMode>(values);
     return result;
   }
-
-#ifdef EIGEN_USE_SYCL
-  // binding placeholder accessors to a command group handler for SYCL
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void bind(cl::sycl::handler &cgh) const {
-    m_impl.bind(cgh);
-  }
-#endif
 
  protected:
   // Given the output index, finds the first index in the input tensor used to compute the trace

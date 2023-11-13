@@ -40,14 +40,14 @@ template <typename MatrixType>
 std::enable_if_t<((MatrixType::Flags&RowMajorBit)==0),void>
 check_left_top(const MatrixType& m, Index r, Index c,
                Index rows, Index /*unused*/) {
-  VERIFY_IS_EQUAL(m.leftCols(c).coeff(r+c*rows), m(r,c));
+  if(c > 0) VERIFY_IS_EQUAL(m.leftCols(c).coeff(r+c*rows), m(r,c));
 }
 
 template <typename MatrixType>
 std::enable_if_t<((MatrixType::Flags&RowMajorBit)!=0),void>
 check_left_top(const MatrixType& m,  Index r, Index c,
                Index /*unused*/, Index cols) {
-  VERIFY_IS_EQUAL(m.topRows(r).coeff(c+r*cols), m(r,c));
+  if(r > 0) VERIFY_IS_EQUAL(m.topRows(r).coeff(c+r*cols), m(r,c));
 }
 
 template<typename MatrixType> void block(const MatrixType& m)
@@ -306,6 +306,43 @@ void data_and_stride(const MatrixType& m)
   compare_using_data_and_stride(m1.col(c1).transpose());
 }
 
+
+template <typename BaseXpr, typename Xpr = BaseXpr, int Depth = 0>
+struct unwind_test_impl {
+  static void run(Xpr& xpr) {
+    Index startRow = internal::random<Index>(0, xpr.rows() / 5);
+    Index startCol = internal::random<Index>(0, xpr.cols() / 6);
+    Index rows = xpr.rows() / 3;
+    Index cols = xpr.cols() / 2;
+    // test equivalence of const expressions
+    const Block<const Xpr> constNestedBlock(xpr, startRow, startCol, rows, cols);
+    const Block<const BaseXpr> constUnwoundBlock = constNestedBlock.unwind();
+    VERIFY_IS_CWISE_EQUAL(constNestedBlock, constUnwoundBlock);
+    // modify a random element in each representation and test equivalence of non-const expressions
+    Block<Xpr> nestedBlock(xpr, startRow, startCol, rows, cols);
+    Block<BaseXpr> unwoundBlock = nestedBlock.unwind();
+    Index r1 = internal::random<Index>(0, rows - 1);
+    Index c1 = internal::random<Index>(0, cols - 1);
+    Index r2 = internal::random<Index>(0, rows - 1);
+    Index c2 = internal::random<Index>(0, cols - 1);
+    nestedBlock.coeffRef(r1, c1) = internal::random<typename DenseBase<Xpr>::Scalar>();
+    unwoundBlock.coeffRef(r2, c2) = internal::random<typename DenseBase<Xpr>::Scalar>();
+    VERIFY_IS_CWISE_EQUAL(nestedBlock, unwoundBlock);
+    unwind_test_impl<BaseXpr, Block<Xpr>, Depth + 1>::run(nestedBlock);
+  }
+};
+
+template <typename BaseXpr, typename Xpr>
+struct unwind_test_impl<BaseXpr, Xpr, 4> {
+  static void run(const Xpr&) {}
+};
+
+template <typename BaseXpr>
+void unwind_test(const BaseXpr&) {
+  BaseXpr xpr = BaseXpr::Random(100, 100);
+  unwind_test_impl<BaseXpr>::run(xpr);
+}
+
 EIGEN_DECLARE_TEST(block)
 {
   for(int i = 0; i < g_repeat; i++) {
@@ -320,6 +357,7 @@ EIGEN_DECLARE_TEST(block)
     CALL_SUBTEST_7( block(Matrix<int,Dynamic,Dynamic,RowMajor>(internal::random(2,50), internal::random(2,50))) );
 
     CALL_SUBTEST_8( block(Matrix<float,Dynamic,4>(3, 4)) );
+    CALL_SUBTEST_9( unwind_test(MatrixXf()));
 
 #ifndef EIGEN_DEFAULT_TO_ROW_MAJOR
     CALL_SUBTEST_6( data_and_stride(MatrixXf(internal::random(5,50), internal::random(5,50))) );

@@ -10,6 +10,7 @@
 
 #ifndef EIGEN_CXX11_TENSOR_TENSOR_REVERSE_H
 #define EIGEN_CXX11_TENSOR_TENSOR_REVERSE_H
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -368,13 +369,6 @@ struct TensorEvaluator<const TensorReverseOp<ReverseDimensions, ArgType>, Device
 
   EIGEN_DEVICE_FUNC typename Storage::Type data() const { return NULL; }
 
-#ifdef EIGEN_USE_SYCL
-  // binding placeholder accessors to a command group handler for SYCL
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void bind(cl::sycl::handler &cgh) const {
-    m_impl.bind(cgh);
-  }
-#endif
-
  protected:
   Dimensions m_dimensions;
   array<Index, NumDims> m_strides;
@@ -441,12 +435,12 @@ struct TensorEvaluator<TensorReverseOp<ReverseDimensions, ArgType>, Device>
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
   const Dimensions& dimensions() const { return this->m_dimensions; }
 
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Scalar& coeffRef(Index index) {
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Scalar& coeffRef(Index index) const {
     return this->m_impl.coeffRef(this->reverseIndex(index));
   }
 
   template <int StoreMode> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
-  void writePacket(Index index, const PacketReturnType& x) {
+  void writePacket(Index index, const PacketReturnType& x) const {
     eigen_assert(index+PacketSize-1 < dimensions().TotalSize());
 
     // This code is pilfered from TensorMorphing.h

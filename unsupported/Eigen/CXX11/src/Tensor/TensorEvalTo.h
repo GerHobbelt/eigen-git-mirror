@@ -10,6 +10,7 @@
 #ifndef EIGEN_CXX11_TENSOR_TENSOR_EVAL_TO_H
 #define EIGEN_CXX11_TENSOR_TENSOR_EVAL_TO_H
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -159,10 +160,10 @@ struct TensorEvaluator<const TensorEvalToOp<ArgType, MakePointer_>, Device>
   }
 #endif
 
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void evalScalar(Index i) {
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void evalScalar(Index i) const {
     m_buffer[i] = m_impl.coeff(i);
   }
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void evalPacket(Index i) {
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void evalPacket(Index i) const {
     internal::pstoret<CoeffReturnType, PacketReturnType, Aligned>(m_buffer + i, m_impl.template packet<TensorEvaluator<ArgType, Device>::IsAligned ? Aligned : Unaligned>(i));
   }
 
@@ -217,13 +218,8 @@ struct TensorEvaluator<const TensorEvalToOp<ArgType, MakePointer_>, Device>
 
   EIGEN_DEVICE_FUNC EvaluatorPointerType data() const { return m_buffer; }
   ArgType expression() const { return m_expression; }
-  #ifdef EIGEN_USE_SYCL
-  // binding placeholder accessors to a command group handler for SYCL
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void bind(cl::sycl::handler &cgh) const {
-    m_impl.bind(cgh);
-    m_buffer.bind(cgh);
-  }
-  #endif
+  
+
 
 
  private:

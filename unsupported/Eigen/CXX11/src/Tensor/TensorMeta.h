@@ -10,6 +10,7 @@
 #ifndef EIGEN_CXX11_TENSOR_TENSOR_META_H
 #define EIGEN_CXX11_TENSOR_TENSOR_META_H
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -26,21 +27,6 @@ const T2& choose(Cond<false>, const T1&, const T2& second) {
   return second;
 }
 
-
-template <typename T, typename X, typename Y>
-EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
-T divup(const X x, const Y y) {
-  // Note: This form is used because it cannot overflow.
-  return static_cast<T>(x == 0 ? 0 : (x - 1) / y + 1);
-}
-
-template <typename T>
-EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
-T divup(const T x, const T y) {
-  // Note: This form is used because it cannot overflow.
-  return static_cast<T>(x == 0 ? 0 : (x - 1) / y + 1);
-}
-
 template <size_t n> struct max_n_1 {
   static const size_t size = n;
 };
@@ -48,6 +34,11 @@ template <> struct max_n_1<0> {
   static const size_t size = 1;
 };
 
+template <typename T>
+EIGEN_DEPRECATED EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
+constexpr T divup(const T x, const T y) {
+  return Eigen::numext::div_ceil(x, y);
+}
 
 // Default packet types
 template <typename Scalar, typename Device>
@@ -166,7 +157,6 @@ struct PacketType<Scalar, SyclDevice> : internal::default_packet_traits {
     Vectorizable = 0,
     size = 1,
     AlignedOnScalar = 0,
-    HasHalfPacket = 0
   };
   enum {
     HasAdd    = 0,
@@ -269,7 +259,7 @@ namespace internal {
   template<typename IndexType, typename Index, Index First, Index... Is>
   EIGEN_CONSTEXPR EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
   array<Index, 1 + sizeof...(Is)> customIndices2Array(IndexType& idx, numeric_list<Index, First, Is...>) {
-    return { idx[First], idx[Is]... };
+    return { static_cast<Index>(idx[First]), static_cast<Index>(idx[Is])... };
   }
   template<typename IndexType, typename Index>
   EIGEN_CONSTEXPR EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE

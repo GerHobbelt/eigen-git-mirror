@@ -11,6 +11,7 @@
 #ifndef EIGEN_MATRIXBASE_H
 #define EIGEN_MATRIXBASE_H
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -125,9 +126,9 @@ template<typename Derived> class MatrixBase
 
 #define EIGEN_CURRENT_STORAGE_BASE_CLASS Eigen::MatrixBase
 #define EIGEN_DOC_UNARY_ADDONS(X,Y)
-#   include "../plugins/CommonCwiseBinaryOps.h"
-#   include "../plugins/MatrixCwiseUnaryOps.h"
-#   include "../plugins/MatrixCwiseBinaryOps.h"
+#   include "../plugins/CommonCwiseBinaryOps.inc"
+#   include "../plugins/MatrixCwiseUnaryOps.inc"
+#   include "../plugins/MatrixCwiseBinaryOps.inc"
 #   ifdef EIGEN_MATRIXBASE_PLUGIN
 #     include EIGEN_MATRIXBASE_PLUGIN
 #   endif
@@ -328,10 +329,10 @@ template<typename Derived> class MatrixBase
 
 /////////// LU module ///////////
 
-    inline const FullPivLU<PlainObject> fullPivLu() const;
-    inline const PartialPivLU<PlainObject> partialPivLu() const;
+    template<typename PermutationIndex = DefaultPermutationIndex> inline const FullPivLU<PlainObject, PermutationIndex> fullPivLu() const;
+    template<typename PermutationIndex = DefaultPermutationIndex> inline const PartialPivLU<PlainObject, PermutationIndex> partialPivLu() const;
 
-    inline const PartialPivLU<PlainObject> lu() const;
+    template<typename PermutationIndex = DefaultPermutationIndex> inline const PartialPivLU<PlainObject, PermutationIndex> lu() const;
 
     EIGEN_DEVICE_FUNC
     inline const Inverse<Derived> inverse() const;
@@ -362,9 +363,9 @@ template<typename Derived> class MatrixBase
 /////////// QR module ///////////
 
     inline const HouseholderQR<PlainObject> householderQr() const;
-    inline const ColPivHouseholderQR<PlainObject> colPivHouseholderQr() const;
-    inline const FullPivHouseholderQR<PlainObject> fullPivHouseholderQr() const;
-    inline const CompleteOrthogonalDecomposition<PlainObject> completeOrthogonalDecomposition() const;
+    template<typename PermutationIndex = DefaultPermutationIndex> inline const ColPivHouseholderQR<PlainObject, PermutationIndex> colPivHouseholderQr() const;
+    template<typename PermutationIndex = DefaultPermutationIndex> inline const FullPivHouseholderQR<PlainObject, PermutationIndex> fullPivHouseholderQr() const;
+    template<typename PermutationIndex = DefaultPermutationIndex> inline const CompleteOrthogonalDecomposition<PlainObject, PermutationIndex> completeOrthogonalDecomposition() const;
 
 /////////// Eigenvalues module ///////////
 
@@ -399,8 +400,11 @@ template<typename Derived> class MatrixBase
     EIGEN_DEVICE_FUNC
     inline PlainObject unitOrthogonal(void) const;
 
-    EIGEN_DEVICE_FUNC
+    EIGEN_DEPRECATED EIGEN_DEVICE_FUNC
     inline Matrix<Scalar,3,1> eulerAngles(Index a0, Index a1, Index a2) const;
+
+    EIGEN_DEVICE_FUNC
+    inline Matrix<Scalar,3,1> canonicalEulerAngles(Index a0, Index a1, Index a2) const;
 
     // put this as separate enum value to work around possible GCC 4.3 bug (?)
     enum { HomogeneousReturnTypeDirection = ColsAtCompileTime==1&&RowsAtCompileTime==1 ? ((internal::traits<Derived>::Flags&RowMajorBit)==RowMajorBit ? Horizontal : Vertical)

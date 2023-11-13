@@ -10,6 +10,7 @@
 #ifndef EIGEN_CXX11_TENSOR_TENSOR_CONTRACTION_H
 #define EIGEN_CXX11_TENSOR_TENSOR_CONTRACTION_H
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -91,9 +92,8 @@ struct TensorContractionBlockMemAllocator {
     eigen_assert(rhs_block);
     BlockSizes sz = ComputeLhsRhsBlockSizes(bm, bk, bn);
     char* block_mem = static_cast<char*>(d.allocate(sz.lhs_size + sz.rhs_size));
-    eigen_assert(block_mem);
-    *lhs_block = reinterpret_cast<LhsScalar*>(block_mem);
-    *rhs_block = reinterpret_cast<RhsScalar*>(block_mem + sz.lhs_size);
+    *lhs_block = static_cast<LhsScalar*>(static_cast<void*>(block_mem));
+    *rhs_block = static_cast<RhsScalar*>(static_cast<void*>(block_mem + sz.lhs_size));
     return block_mem;
   }
 
@@ -116,12 +116,12 @@ struct TensorContractionBlockMemAllocator {
     for (Index x = 0; x < num_slices; x++) {
       if (num_lhs > 0) lhs_blocks[x].resize(num_lhs);
       for (Index m = 0; m < num_lhs; m++) {
-        lhs_blocks[x][m] = reinterpret_cast<LhsScalar*>(mem);
+        lhs_blocks[x][m] = static_cast<LhsScalar*>(static_cast<void*>(mem));
         mem += sz.lhs_size;
       }
       if (num_rhs > 0) rhs_blocks[x].resize(num_rhs);
       for (Index n = 0; n < num_rhs; n++) {
-        rhs_blocks[x][n] = reinterpret_cast<RhsScalar*>(mem);
+        rhs_blocks[x][n] = static_cast<RhsScalar*>(static_cast<void*>(mem));
         mem += sz.rhs_size;
       }
     }
@@ -144,8 +144,8 @@ struct TensorContractionBlockMemAllocator {
                                                               const Index bn) {
     Index align = numext::maxi(EIGEN_MAX_ALIGN_BYTES, 1);
     BlockSizes sz;
-    sz.lhs_size = divup<Index>(bm * bk * sizeof(LhsScalar), align) * align;
-    sz.rhs_size = divup<Index>(bn * bk * sizeof(RhsScalar), align) * align;
+    sz.lhs_size = numext::div_ceil<Index>(bm * bk * sizeof(LhsScalar), align) * align;
+    sz.rhs_size = numext::div_ceil<Index>(bn * bk * sizeof(RhsScalar), align) * align;
     return sz;
   }
 };
@@ -362,10 +362,8 @@ class TensorContractionOp : public TensorBase<TensorContractionOp<Indices, LhsXp
     const OutputKernelType m_output_kernel;
 };
 
-
 template<typename Derived>
-struct TensorContractionEvaluatorBase : internal::no_assignment_operator
-{
+struct TensorContractionEvaluatorBase {
   typedef typename internal::traits<Derived>::Indices Indices;
   typedef typename internal::traits<Derived>::LeftArgType LeftArgType;
   typedef typename internal::traits<Derived>::RightArgType RightArgType;

@@ -14,6 +14,7 @@
 #include <iostream>
 #include <vector>
 
+// IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen { 
@@ -189,6 +190,7 @@ bool loadMarket(SparseMatrixType& mat, const std::string& filename)
         readsizes = true;
         mat.resize(M,N);
         mat.reserve(NNZ);
+        elements.reserve(NNZ);
       }
     }
     else
