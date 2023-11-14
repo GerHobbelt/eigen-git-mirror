@@ -19,6 +19,11 @@ using namespace Eigen;
 #define SCALAR double
 #endif
 
+#if defined(_MSC_VER)
+#define asm(x)		__asm(x)
+#endif
+
+
 int main(int argc, char *argv[])
 {
     Matrix<SCALAR,MATSIZE,MATSIZE> I = Matrix<SCALAR,MATSIZE,MATSIZE>::Ones();

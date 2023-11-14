@@ -18,6 +18,11 @@ using namespace Eigen;
 #include <boost/preprocessor/punctuation/comma.hpp>
 #include <boost/preprocessor/stringize.hpp>
 
+#if defined(_MSC_VER)
+#define __attribute__(x)		/**/
+#endif
+
+
 template<typename MatrixType> void initMatrix_random(MatrixType& mat) __attribute__((noinline));
 template<typename MatrixType> void initMatrix_random(MatrixType& mat)
 {

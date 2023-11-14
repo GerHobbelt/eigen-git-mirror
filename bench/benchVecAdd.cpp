@@ -12,11 +12,16 @@ using namespace Eigen;
 #define REPEAT 10000
 #endif
 
+#if defined(_MSC_VER)
+#define __attribute__(x)		/**/
+#endif
+
+
 typedef float Scalar;
 
-__attribute__ ((noinline)) void benchVec(Scalar* a, Scalar* b, Scalar* c, int size);
-__attribute__ ((noinline)) void benchVec(MatrixXf& a, MatrixXf& b, MatrixXf& c);
-__attribute__ ((noinline)) void benchVec(VectorXf& a, VectorXf& b, VectorXf& c);
+__attribute__ ((noinline)) static void benchVec(Scalar* a, Scalar* b, Scalar* c, int size);
+__attribute__ ((noinline)) static void benchVec(MatrixXf& a, MatrixXf& b, MatrixXf& c);
+__attribute__ ((noinline)) static void benchVec(VectorXf& a, VectorXf& b, VectorXf& c);
 
 int main(int argc, char* argv[])
 {
@@ -76,19 +81,19 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void benchVec(MatrixXf& a, MatrixXf& b, MatrixXf& c)
+static void benchVec(MatrixXf& a, MatrixXf& b, MatrixXf& c)
 {
     for (int k=0; k<REPEAT; ++k)
         a = a + b;
 }
 
-void benchVec(VectorXf& a, VectorXf& b, VectorXf& c)
+static void benchVec(VectorXf& a, VectorXf& b, VectorXf& c)
 {
     for (int k=0; k<REPEAT; ++k)
         a = a + b;
 }
 
-void benchVec(Scalar* a, Scalar* b, Scalar* c, int size)
+static void benchVec(Scalar* a, Scalar* b, Scalar* c, int size)
 {
     typedef internal::packet_traits<Scalar>::type PacketScalar;
     const int PacketSize = internal::packet_traits<Scalar>::size;
