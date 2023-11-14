@@ -210,10 +210,10 @@ template<typename MatrixType_, unsigned int Mode_> class TriangularView
     enum {
       Mode = Mode_,
       Flags = internal::traits<TriangularView>::Flags,
-      TransposeMode = (Mode & Upper ? Lower : 0)
-                    | (Mode & Lower ? Upper : 0)
-                    | (Mode & (UnitDiag))
-                    | (Mode & (ZeroDiag)),
+      TransposeMode = (Mode & (int)Upper ? (int)Lower : 0)
+                    | (Mode & (int)Lower ? (int)Upper : 0)
+                    | (Mode & (int)(UnitDiag))
+                    | (Mode & (int)(ZeroDiag)),
       IsVectorAtCompileTime = false
     };
 
