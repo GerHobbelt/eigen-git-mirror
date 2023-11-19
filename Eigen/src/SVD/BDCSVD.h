@@ -119,8 +119,8 @@ public:
   typedef typename Base::Index Index;
   enum {
     Options = Options_,
-    QRDecomposition = Options & internal::QRPreconditionerBits,
-    ComputationOptions = Options & internal::ComputationOptionsBits,
+    QRDecomposition = Options & (int)internal::QRPreconditionerBits,
+    ComputationOptions = Options & (int)internal::ComputationOptionsBits,
     RowsAtCompileTime = Base::RowsAtCompileTime,
     ColsAtCompileTime = Base::ColsAtCompileTime,
     DiagSizeAtCompileTime = Base::DiagSizeAtCompileTime,

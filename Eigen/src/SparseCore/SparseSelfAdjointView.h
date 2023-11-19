@@ -50,7 +50,7 @@ template<typename MatrixType, unsigned int Mode_> class SparseSelfAdjointView
     
     enum {
       Mode = Mode_,
-      TransposeMode = ((Mode & Upper) ? Lower : 0) | ((Mode & Lower) ? Upper : 0),
+      TransposeMode = ((Mode & (int)Upper) ? (int)Lower : 0) | ((Mode & (int)Lower) ? (int)Upper : 0),
       RowsAtCompileTime = internal::traits<SparseSelfAdjointView>::RowsAtCompileTime,
       ColsAtCompileTime = internal::traits<SparseSelfAdjointView>::ColsAtCompileTime
     };
