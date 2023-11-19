@@ -1,4 +1,4 @@
-#include <Eigen/Array>
+#include <Eigen/Matrix>
 
 int main(int argc, char *argv[])
 {
