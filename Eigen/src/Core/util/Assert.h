@@ -10,6 +10,8 @@
 #ifndef EIGEN_CORE_UTIL_ASSERT_H
 #define EIGEN_CORE_UTIL_ASSERT_H
 
+#include <cassert>
+
 // Eigen custom assert function.
 //
 // The combination of Eigen's relative includes and cassert's `assert` function
@@ -28,8 +30,6 @@
 //  - we are not compiling for GPU, or
 //  - gpu debugging is enabled.
 #if !defined(EIGEN_NO_DEBUG) && (!defined(EIGEN_GPU_COMPILE_PHASE) || !defined(EIGEN_NO_DEBUG_GPU))
-
-#include <cassert>
 
 #ifndef EIGEN_USE_CUSTOM_PLAIN_ASSERT
 // Disable new custom asserts by default for now.
