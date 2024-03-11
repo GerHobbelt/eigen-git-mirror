@@ -209,6 +209,11 @@ void stable_norm(const MatrixType& m) {
   }
 }
 
+void test_empty() {
+  Eigen::VectorXf empty(0);
+  VERIFY_IS_EQUAL(empty.stableNorm(), 0.0f);
+}
+
 template <typename Scalar>
 void test_hypot() {
   typedef typename NumTraits<Scalar>::Real RealScalar;
@@ -220,7 +225,7 @@ void test_hypot() {
   while (numext::abs2(factor) < RealScalar(1e-4)) factor = internal::random<Scalar>();
   Scalar small = factor * ((std::numeric_limits<RealScalar>::min)() * RealScalar(1e4));
 
-  Scalar one(1), zero(0), sqrt2(std::sqrt(Scalar(2))), nan(std::numeric_limits<RealScalar>::quiet_NaN());
+  Scalar one(1), zero(0), sqrt2(std::sqrt(2)), nan(std::numeric_limits<RealScalar>::quiet_NaN());
 
   Scalar a = internal::random<Scalar>(-1, 1);
   Scalar b = internal::random<Scalar>(-1, 1);
@@ -235,6 +240,8 @@ void test_hypot() {
 }
 
 EIGEN_DECLARE_TEST(stable_norm) {
+  CALL_SUBTEST_1(test_empty());
+
   for (int i = 0; i < g_repeat; i++) {
     CALL_SUBTEST_3(test_hypot<double>());
     CALL_SUBTEST_4(test_hypot<float>());
