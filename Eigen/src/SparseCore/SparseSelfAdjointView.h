@@ -53,7 +53,7 @@ class SparseSelfAdjointView : public EigenBase<SparseSelfAdjointView<MatrixType,
  public:
   enum {
     Mode = Mode_,
-    TransposeMode = ((Mode & (int)Upper) ? (int)Lower : 0) | ((Mode & (int)Lower) ? (int)Upper : 0),
+    TransposeMode = ((int(Mode) & int(Upper)) ? Lower : 0) | ((int(Mode) & int(Lower)) ? Upper : 0),
     RowsAtCompileTime = internal::traits<SparseSelfAdjointView>::RowsAtCompileTime,
     ColsAtCompileTime = internal::traits<SparseSelfAdjointView>::ColsAtCompileTime
   };

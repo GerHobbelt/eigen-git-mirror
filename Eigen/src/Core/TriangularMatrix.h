@@ -184,10 +184,10 @@ class TriangularView
   enum {
     Mode = Mode_,
     Flags = internal::traits<TriangularView>::Flags,
-      TransposeMode = (Mode & (int)Upper ? (int)Lower : 0)
-                    | (Mode & (int)Lower ? (int)Upper : 0)
-                    | (Mode & (int)(UnitDiag))
-                    | (Mode & (int)(ZeroDiag)),
+    TransposeMode = (int(Mode) & int(Upper) ? Lower : 0)
+                  | (int(Mode) & int(Lower) ? Upper : 0)
+                  | (int(Mode) & int(UnitDiag))
+                  | (int(Mode) & int(ZeroDiag)),
     IsVectorAtCompileTime = false
   };
 
