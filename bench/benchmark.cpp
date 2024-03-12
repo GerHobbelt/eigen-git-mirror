@@ -20,7 +20,7 @@ using namespace Eigen;
 #endif
 
 #if defined(_MSC_VER)
-#define asm(x)		__asm(x)
+#define asm(x)		/**/ // __asm(x)
 #endif
 
 
