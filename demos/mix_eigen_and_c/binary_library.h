@@ -18,8 +18,8 @@ extern "C" {
 
 // just dummy empty structs to give different pointer types,
 // instead of using void* which would be type unsafe
-struct C_MatrixXd {};
-struct C_Map_MatrixXd {};
+struct C_MatrixXd { char x; };
+struct C_Map_MatrixXd { char x; };
 
 // the C_MatrixXd class, wraps some of the functionality
 // of Eigen::MatrixXd.
