@@ -12,7 +12,7 @@
 #include <iomanip>
 
 #include "main.h"
-#include <Eigen/LevenbergMarquardt>
+#include <Eigen/LevenbergMarquardt>        // unsupported
 
 using namespace std;
 using namespace Eigen;

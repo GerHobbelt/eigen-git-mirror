@@ -14,7 +14,7 @@
 
 #include <iostream>
 #include <bench/BenchTimer.h>
-#include <unsupported/Eigen/SVD>
+#include <Eigen/SVD>
 
 using namespace Eigen;
 using namespace std;
@@ -92,7 +92,12 @@ void bench_svd(const MatrixType& a = MatrixType()) {
   std::cout << std::endl;
 }
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_svd_main
+#endif
+
+int main(int argc, const char** argv) {
   std::cout << std::endl;
 
   std::cout << "On a (Dynamic, Dynamic) (6, 6) Matrix" << std::endl;
