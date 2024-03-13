@@ -1,4 +1,4 @@
-#include <Eigen/Array>
+#include <Eigen/Core>
 #include <iostream>
 
 
