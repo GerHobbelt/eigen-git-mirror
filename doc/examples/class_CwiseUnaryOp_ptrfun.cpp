@@ -9,8 +9,13 @@ double ramp(double x) {
     return 0;
 }
 
-int main(int, char**) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_class_cwise_ptrfun_main
+#endif
+
+int main() {
   Eigen::Matrix4d m1 = Eigen::Matrix4d::Random();
-  std::cout << m1 << std::endl << "becomes: " << std::endl << m1.unaryExpr(std::ptr_fun(ramp)) << std::endl;
+  std::cout << m1 << std::endl << "becomes: " << std::endl << m1.unaryExpr([](double x) { return ramp(x); }) << std::endl;
   return 0;
 }
