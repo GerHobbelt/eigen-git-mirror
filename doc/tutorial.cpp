@@ -1,6 +1,11 @@
 #include <Eigen/Matrix>
 
-int main(int argc, char *argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_main
+#endif
+
+int main(int argc, const char** argv) {
   std::cout.precision(2);
 
   // demo static functions
