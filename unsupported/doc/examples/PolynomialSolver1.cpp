@@ -5,6 +5,11 @@
 using namespace Eigen;
 using namespace std;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_poly_solver_main
+#endif
+
 int main() {
   typedef Matrix<double, 5, 1> Vector5d;
 
@@ -49,4 +54,5 @@ int main() {
   cout << "The last root in float then in double: " << psolvef.roots()[5] << "\t" << psolve6d.roots()[5] << endl;
   std::complex<float> castedRoot(psolve6d.roots()[5].real(), psolve6d.roots()[5].imag());
   cout << "Norm of the difference: " << std::abs(psolvef.roots()[5] - castedRoot) << endl;
+  return 0;
 }

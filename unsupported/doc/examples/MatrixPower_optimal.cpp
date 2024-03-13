@@ -3,6 +3,11 @@
 
 using namespace Eigen;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_matrix_pow_opt_main
+#endif
+
 int main() {
   Matrix4cd A = Matrix4cd::Random();
   MatrixPower<Matrix4cd> Apow(A);

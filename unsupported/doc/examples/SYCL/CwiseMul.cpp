@@ -7,6 +7,11 @@ using Eigen::SyclDevice;
 using Eigen::Tensor;
 using Eigen::TensorMap;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_sycl_cwise_mul_main
+#endif
+
 int main() {
   using DataType = float;
   using IndexType = int64_t;
@@ -60,4 +65,5 @@ int main() {
     }
   }
   printf("c=a*b Done\n");
+  return 0;
 }

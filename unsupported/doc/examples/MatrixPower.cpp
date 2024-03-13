@@ -3,6 +3,11 @@
 
 using namespace Eigen;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_matrix_pow_main
+#endif
+
 int main() {
   const double pi = std::acos(-1.0);
   Matrix3d A;

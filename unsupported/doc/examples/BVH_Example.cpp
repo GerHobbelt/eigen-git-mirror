@@ -34,6 +34,11 @@ struct PointPointMinimizer  // how to compute squared distances between points a
   int calls;
 };
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_bhv_main
+#endif
+
 int main() {
   typedef std::vector<Vector2d, aligned_allocator<Vector2d> > StdVectorOfVector2d;
   StdVectorOfVector2d redPoints, bluePoints;

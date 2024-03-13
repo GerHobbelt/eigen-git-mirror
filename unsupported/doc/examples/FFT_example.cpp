@@ -95,6 +95,11 @@ void demo_all_types(int nfft) {
   two_demos<long double>(nfft);
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_fft_main
+#endif
+
 int main() {
   demo_all_types(2 * 3 * 4 * 5 * 7);
   demo_all_types(2 * 9 * 16 * 25);

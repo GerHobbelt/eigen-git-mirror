@@ -3,6 +3,11 @@
 
 using namespace Eigen;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_euler_angles_main
+#endif
+
 int main() {
   // A common Euler system by many armies around the world,
   //  where the first one is the azimuth(the angle from the north -

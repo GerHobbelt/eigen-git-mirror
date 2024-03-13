@@ -4,6 +4,11 @@
 using namespace Eigen;
 using namespace std;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_poly_utils_main
+#endif
+
 int main() {
   Vector4d roots = Vector4d::Random();
   cout << "Roots: " << roots.transpose() << endl;
@@ -19,4 +24,5 @@ int main() {
     evaluation[i] = poly_eval(polynomial, roots[i]);
   }
   cout << "Evaluation of the polynomial at the roots: " << evaluation.transpose();
+  return 0;
 }
