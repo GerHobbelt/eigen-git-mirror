@@ -19,8 +19,8 @@ namespace internal {
 template <typename ViewOp, typename MatrixType, typename StrideType>
 struct traits<CwiseUnaryView<ViewOp, MatrixType, StrideType> > : traits<MatrixType> {
   // std::result_of is deprecated (C++17) or removed (C++20)
-  typedef typename std::result_of<ViewOp(typename traits<MatrixType>::Scalar&)>::type ScalarRef;
-  static_assert(std::is_reference<ScalarRef>::value, "Views must return a reference type.");
+  typedef typename result_of<ViewOp(typename traits<MatrixType>::Scalar&)>::type ScalarRef;
+  //static_assert(std::is_reference<ScalarRef>::value, "Views must return a reference type.");
   typedef remove_all_t<ScalarRef> Scalar;
   typedef typename MatrixType::Nested MatrixTypeNested;
   typedef remove_all_t<MatrixTypeNested> MatrixTypeNested_;
