@@ -69,6 +69,11 @@ struct generic_product_impl<MatrixReplacement, Rhs, SparseShape, DenseShape,
 }  // namespace internal
 }  // namespace Eigen
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_matrixfree_cg_main
+#endif
+
 int main() {
   int n = 10;
   Eigen::SparseMatrix<double> S = Eigen::MatrixXd::Random(n, n).sparseView(0.5, 1);
@@ -116,4 +121,5 @@ int main() {
     std::cout << "MINRES:   #iterations: " << minres.iterations() << ", estimated error: " << minres.error()
               << std::endl;
   }
+  return 0;
 }

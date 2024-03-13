@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_dot_cross_main
+#endif
+
 int main() {
   Eigen::Vector3d v(1, 2, 3);
   Eigen::Vector3d w(0, 1, 2);
@@ -14,4 +19,5 @@ int main() {
   Eigen::Vector2d w2(0, 1);
   double cp = v2.cross(w2);  // returning a scalar between size-2 vectors
   std::cout << "Cross product for 2D vectors: " << cp << std::endl;
+  return 0;
 }

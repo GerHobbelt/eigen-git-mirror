@@ -1,6 +1,11 @@
 #include <Eigen/Dense>
 #include <iostream>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_arr_add_main
+#endif
+
 int main() {
   Eigen::ArrayXXf a(3, 3);
   Eigen::ArrayXXf b(3, 3);
@@ -12,4 +17,5 @@ int main() {
 
   // Subtracting a scalar from an array
   std::cout << "a - 2 = " << std::endl << a - 2 << std::endl;
+  return 0;
 }

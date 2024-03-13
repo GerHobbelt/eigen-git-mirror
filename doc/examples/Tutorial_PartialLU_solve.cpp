@@ -2,6 +2,11 @@
 #include <Eigen/LU>
 #include <iostream>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_partial_lu_solver_main
+#endif
+
 int main() {
   Eigen::Matrix3f A;
   Eigen::Vector3f b;
@@ -11,4 +16,5 @@ int main() {
   std::cout << "Here is the vector b:" << std::endl << b << std::endl;
   Eigen::Vector3f x = A.lu().solve(b);
   std::cout << "The solution is:" << std::endl << x << std::endl;
+  return 0;
 }

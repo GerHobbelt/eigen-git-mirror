@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_lin_comp_colpivot_main
+#endif
+
 int main() {
   Eigen::Matrix3f A;
   Eigen::Vector3f b;
@@ -10,4 +15,5 @@ int main() {
   std::cout << "Here is the vector b:\n" << b << std::endl;
   Eigen::Vector3f x = A.colPivHouseholderQr().solve(b);
   std::cout << "The solution is:\n" << x << std::endl;
+  return 0;
 }

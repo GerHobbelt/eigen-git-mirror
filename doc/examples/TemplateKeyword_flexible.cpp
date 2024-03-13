@@ -7,6 +7,11 @@ void copyUpperTriangularPart(Eigen::MatrixBase<Derived1>& dst, const Eigen::Matr
   dst.template triangularView<Eigen::Upper>() = src.template triangularView<Eigen::Upper>();
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_tpl_keyword_flex_main
+#endif
+
 int main() {
   Eigen::MatrixXi m1 = Eigen::MatrixXi::Ones(5, 5);
   Eigen::MatrixXi m2 = Eigen::MatrixXi::Random(4, 4);
@@ -15,4 +20,5 @@ int main() {
   copyUpperTriangularPart(m2, m1.topLeftCorner(4, 4));
   std::cout << "m2 after copy:" << std::endl;
   std::cout << m2 << std::endl << std::endl;
+  return 0;
 }

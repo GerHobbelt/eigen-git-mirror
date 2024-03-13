@@ -34,6 +34,11 @@ mat_indexing(const Eigen::MatrixBase<ArgType>& arg, const RowIndexType& row_indi
 }
 // [function]
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_nullary_indexing_main
+#endif
+
 int main() {
   std::cout << "[main1]\n";
   Eigen::MatrixXi A = Eigen::MatrixXi::Random(4, 4);
@@ -57,4 +62,5 @@ int main() {
             << std::endl;
   std::cout << B << std::endl << std::endl;
   std::cout << "[main2]\n";
+  return 0;
 }

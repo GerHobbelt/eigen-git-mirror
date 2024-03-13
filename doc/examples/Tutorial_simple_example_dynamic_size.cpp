@@ -1,6 +1,11 @@
 #include <Eigen/Core>
 #include <iostream>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_dyn_size_main
+#endif
+
 int main() {
   for (int size = 1; size <= 4; ++size) {
     Eigen::MatrixXi m(size, size + 1);    // a (size)x(size+1)-matrix of int's
@@ -18,4 +23,5 @@ int main() {
   v(2) = 3;
   v(3) = 4;
   std::cout << "\nv:\n" << v << std::endl;
+  return 0;
 }

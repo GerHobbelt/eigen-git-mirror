@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_matrix_mul_main
+#endif
+
 int main() {
   Eigen::Matrix2d mat;
   mat << 1, 2, 3, 4;
@@ -13,4 +18,5 @@ int main() {
   std::cout << "Let's multiply mat by itself" << std::endl;
   mat = mat * mat;
   std::cout << "Now mat is mat:\n" << mat << std::endl;
+  return 0;
 }

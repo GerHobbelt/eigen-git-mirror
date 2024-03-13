@@ -1,6 +1,11 @@
 #include <Eigen/Dense>
 #include <iostream>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_blk_assign_main
+#endif
+
 int main() {
   Eigen::Array22f m;
   m << 1, 2, 3, 4;
@@ -10,4 +15,5 @@ int main() {
   std::cout << "Here is now a with m copied into its central 2x2 block:\n" << a << "\n\n";
   a.block(0, 0, 2, 3) = a.block(2, 1, 2, 3);
   std::cout << "Here is now a with bottom-right 2x3 block copied into top-left 2x3 block:\n" << a << "\n\n";
+  return 0;
 }

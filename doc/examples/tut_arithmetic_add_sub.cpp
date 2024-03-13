@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_add_sub_main
+#endif
+
 int main() {
   Eigen::Matrix2d a;
   a << 1, 2, 3, 4;
@@ -14,4 +19,5 @@ int main() {
   Eigen::Vector3d v(1, 2, 3);
   Eigen::Vector3d w(1, 0, 0);
   std::cout << "-v + w - v =\n" << -v + w - v << std::endl;
+  return 0;
 }

@@ -11,7 +11,12 @@ const Eigen::Block<const Derived> topLeftCorner(const Eigen::MatrixBase<Derived>
   return Eigen::Block<const Derived>(m.derived(), 0, 0, rows, cols);
 }
 
-int main(int, char**) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_class_block_main
+#endif
+
+int main() {
   Eigen::Matrix4d m = Eigen::Matrix4d::Identity();
   std::cout << topLeftCorner(4 * m, 2, 3) << std::endl;  // calls the const version
   topLeftCorner(m, 2, 3) *= 5;                           // calls the non-const version

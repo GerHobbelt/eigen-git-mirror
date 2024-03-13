@@ -1,6 +1,11 @@
 #include <Eigen/Dense>
 #include <iostream>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_arr_access_main
+#endif
+
 int main() {
   Eigen::ArrayXXf m(2, 2);
 
@@ -18,4 +23,5 @@ int main() {
 
   // print values to standard output
   std::cout << m << std::endl;
+  return 0;
 }

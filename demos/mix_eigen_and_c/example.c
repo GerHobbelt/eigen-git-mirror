@@ -55,7 +55,13 @@ void demo_Map_MatrixXd() {
   print_array(array, 5);
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_demo_example_main
+#endif
+
 int main() {
   demo_MatrixXd();
   demo_Map_MatrixXd();
+  return 0;
 }

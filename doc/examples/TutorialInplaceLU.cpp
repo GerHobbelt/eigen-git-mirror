@@ -6,6 +6,11 @@ init init_obj;
 // [init]
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_inplace_lu_main
+#endif
+
 int main() {
   Eigen::MatrixXd A(2, 2);
   A << 2, -1, 1, 3;
@@ -54,4 +59,5 @@ int main() {
   x = lu.solve(b);
   std::cout << "Residual: " << (A1 * x - b).norm() << "\n";
   std::cout << "[recompute_bis1]\n";
+  return 0;
 }

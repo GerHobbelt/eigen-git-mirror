@@ -11,7 +11,12 @@ const Eigen::Block<const Derived, 2, 2> topLeft2x2Corner(const Eigen::MatrixBase
   return Eigen::Block<const Derived, 2, 2>(m.derived(), 0, 0);
 }
 
-int main(int, char**) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_class_fixed_block_main
+#endif
+
+int main() {
   Eigen::Matrix3d m = Eigen::Matrix3d::Identity();
   std::cout << topLeft2x2Corner(4 * m) << std::endl;  // calls the const version
   topLeft2x2Corner(m) *= 2;                           // calls the non-const version

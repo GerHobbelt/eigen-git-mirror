@@ -3,6 +3,11 @@
 
 using Eigen::MatrixXf;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_arr_interop_matrix_main
+#endif
+
 int main() {
   MatrixXf m(2, 2);
   MatrixXf n(2, 2);
@@ -19,4 +24,5 @@ int main() {
   std::cout << "-- With cwiseProduct: --\n" << result << "\n\n";
   result = m.array() + 4;
   std::cout << "-- Array m + 4: --\n" << result << "\n\n";
+  return 0;
 }

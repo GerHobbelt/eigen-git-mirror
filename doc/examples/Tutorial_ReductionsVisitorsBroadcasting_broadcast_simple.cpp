@@ -2,6 +2,12 @@
 #include <Eigen/Dense>
 
 using namespace std;
+
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_redvisit_simple_main
+#endif
+
 int main() {
   Eigen::MatrixXf mat(2, 4);
   Eigen::VectorXf v(2);
@@ -15,4 +21,5 @@ int main() {
 
   std::cout << "Broadcasting result: " << std::endl;
   std::cout << mat << std::endl;
+  return 0;
 }

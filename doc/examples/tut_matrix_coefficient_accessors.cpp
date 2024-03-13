@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_coeff_access_main
+#endif
+
 int main() {
   Eigen::MatrixXd m(2, 2);
   m(0, 0) = 3;
@@ -12,4 +17,5 @@ int main() {
   v(0) = 4;
   v(1) = v(0) - 1;
   std::cout << "Here is the vector v:\n" << v << std::endl;
+  return 0;
 }

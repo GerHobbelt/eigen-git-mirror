@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_redvisit_1nn_main
+#endif
+
 int main() {
   Eigen::MatrixXf m(2, 4);
   Eigen::VectorXf v(2);
@@ -15,4 +20,5 @@ int main() {
 
   std::cout << "Nearest neighbour is column " << index << ":" << std::endl;
   std::cout << m.col(index) << std::endl;
+  return 0;
 }

@@ -35,6 +35,11 @@ Eigen::CwiseNullaryOp<circulant_functor<ArgType>, typename circulant_helper<ArgT
 }
 // [makeCirculant]
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_make_circulant2_main
+#endif
+
 // [main]
 int main() {
   Eigen::VectorXd vec(4);
@@ -42,5 +47,6 @@ int main() {
   Eigen::MatrixXd mat;
   mat = makeCirculant(vec);
   std::cout << mat << std::endl;
+  return 0;
 }
 // [main]

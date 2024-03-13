@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_lin_self_adj_solver_main
+#endif
+
 int main() {
   Eigen::Matrix2f A;
   A << 1, 2, 2, 3;
@@ -11,4 +16,5 @@ int main() {
   std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
             << "corresponding to these eigenvalues:\n"
             << eigensolver.eigenvectors() << std::endl;
+  return 0;
 }

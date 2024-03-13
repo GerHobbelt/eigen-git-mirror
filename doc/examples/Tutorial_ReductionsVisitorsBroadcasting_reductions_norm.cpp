@@ -1,6 +1,11 @@
 #include <Eigen/Dense>
 #include <iostream>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_redvisit_norm_main
+#endif
+
 int main() {
   Eigen::VectorXf v(2);
   Eigen::MatrixXf m(2, 2), n(2, 2);
@@ -19,4 +24,5 @@ int main() {
   std::cout << "m.norm() = " << m.norm() << std::endl;
   std::cout << "m.lpNorm<1>() = " << m.lpNorm<1>() << std::endl;
   std::cout << "m.lpNorm<Infinity>() = " << m.lpNorm<Eigen::Infinity>() << std::endl;
+  return 0;
 }

@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_lin_rank_reveal_main
+#endif
+
 int main() {
   Eigen::Matrix3f A;
   A << 1, 2, 5, 2, 1, 4, 3, 0, 3;
@@ -11,4 +16,5 @@ int main() {
             << lu_decomp.kernel() << std::endl;
   std::cout << "Here is a matrix whose columns form a basis of the column-space of A:\n"
             << lu_decomp.image(A) << std::endl;  // yes, have to pass the original A
+  return 0;
 }

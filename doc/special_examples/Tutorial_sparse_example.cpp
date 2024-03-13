@@ -8,7 +8,12 @@ typedef Eigen::Triplet<double> T;
 void buildProblem(std::vector<T>& coefficients, Eigen::VectorXd& b, int n);
 void saveAsBitmap(const Eigen::VectorXd& x, int n, const char* filename);
 
-int main(int argc, char** argv) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_sparse_main
+#endif
+
+int main(int argc, const char** argv) {
   if (argc != 2) {
     std::cerr << "Error: expected one and only one argument.\n";
     return -1;

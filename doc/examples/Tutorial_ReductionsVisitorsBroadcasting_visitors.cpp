@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_redvisit_base_main
+#endif
+
 int main() {
   Eigen::MatrixXf m(2, 2);
 
@@ -16,4 +21,5 @@ int main() {
 
   std::cout << "Max: " << max << ", at: " << maxRow << "," << maxCol << std::endl;
   std::cout << "Min: " << min << ", at: " << minRow << "," << minCol << std::endl;
+  return 0;
 }

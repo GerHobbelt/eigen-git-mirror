@@ -1,6 +1,9 @@
 #include <Eigen/Sparse>
 #include <vector>
+
+#if !defined(BUILD_MONOLITHIC)    // we don't do Qt, period.
 #include <QImage>
+#endif
 
 typedef Eigen::SparseMatrix<double> SpMat;  // declares a column-major sparse matrix type of double
 typedef Eigen::Triplet<double> T;
@@ -33,6 +36,8 @@ void buildProblem(std::vector<T>& coefficients, Eigen::VectorXd& b, int n) {
   }
 }
 
+#if !defined(BUILD_MONOLITHIC)    // we don't do Qt, period.
+
 void saveAsBitmap(const Eigen::VectorXd& x, int n, const char* filename) {
   Eigen::Array<unsigned char, Eigen::Dynamic, Eigen::Dynamic> bits = (x * 255).cast<unsigned char>();
   QImage img(bits.data(), n, n, QImage::Format_Indexed8);
@@ -40,3 +45,5 @@ void saveAsBitmap(const Eigen::VectorXd& x, int n, const char* filename) {
   for (int i = 0; i < 256; i++) img.setColor(i, qRgb(i, i, i));
   img.save(filename);
 }
+
+#endif

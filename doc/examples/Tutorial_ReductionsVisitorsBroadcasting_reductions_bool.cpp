@@ -1,6 +1,11 @@
 #include <Eigen/Dense>
 #include <iostream>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_redvisit_bool_main
+#endif
+
 int main() {
   Eigen::ArrayXXf a(2, 2);
 
@@ -13,4 +18,5 @@ int main() {
   std::cout << "(a > 2).all()   = " << (a > 2).all() << std::endl;
   std::cout << "(a > 2).any()   = " << (a > 2).any() << std::endl;
   std::cout << "(a > 2).count() = " << (a > 2).count() << std::endl;
+  return 0;
 }

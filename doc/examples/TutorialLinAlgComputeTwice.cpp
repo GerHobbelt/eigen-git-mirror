@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_tutorial_lin_comp_twice_main
+#endif
+
 int main() {
   Eigen::Matrix2f A, b;
   Eigen::LLT<Eigen::Matrix2f> llt;
@@ -16,4 +21,5 @@ int main() {
   std::cout << "Computing LLT decomposition..." << std::endl;
   llt.compute(A);
   std::cout << "The solution is now:\n" << llt.solve(b) << std::endl;
+  return 0;
 }

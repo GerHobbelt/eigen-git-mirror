@@ -11,7 +11,12 @@ const Eigen::VectorBlock<const Derived> segmentFromRange(const Eigen::MatrixBase
   return Eigen::VectorBlock<const Derived>(v.derived(), start, end - start);
 }
 
-int main(int, char**) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_class_vector_block_main
+#endif
+
+int main() {
   Eigen::Matrix<int, 1, 6> v;
   v << 1, 2, 3, 4, 5, 6;
   std::cout << segmentFromRange(2 * v, 2, 4) << std::endl;  // calls the const version

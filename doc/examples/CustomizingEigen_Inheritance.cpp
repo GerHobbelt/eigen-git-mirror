@@ -17,9 +17,15 @@ class MyVectorType : public Eigen::VectorXd {
   }
 };
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_doc_example_custom_inheritance_main
+#endif
+
 int main() {
   MyVectorType v = MyVectorType::Ones(4);
   v(2) += 10;
   v = 2 * v;
   std::cout << v.transpose() << std::endl;
+  return 0;
 }
