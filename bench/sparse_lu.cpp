@@ -72,7 +72,12 @@ void doEigen(const char* name, const EigenSparseMatrix& sm1, const VectorX& b, V
   // std::cout << x.transpose() << "\n";
 }
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_sparse_lu_main
+#endif
+
+int main(int argc, const char** argv) {
   int rows = SIZE;
   int cols = SIZE;
   float density = DENSITY;

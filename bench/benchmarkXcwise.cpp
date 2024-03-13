@@ -18,7 +18,12 @@ using namespace Eigen;
 #define REPEAT 1000
 #endif
 
-int main(int argc, char *argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_xcwise_main
+#endif
+
+int main(int argc, const char **argv) {
   VECTYPE I = VECTYPE::Ones(VECSIZE);
   VECTYPE m(VECSIZE, 1);
   for (int i = 0; i < VECSIZE; i++) {

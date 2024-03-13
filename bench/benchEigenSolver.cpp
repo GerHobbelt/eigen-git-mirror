@@ -169,7 +169,12 @@ __attribute__((noinline)) void benchEigenSolver(const MatrixType& m) {
   if (acc == 123) std::cout << acc;
 }
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_solver_main
+#endif
+
+int main(int argc, const char** argv) {
   const int dynsizes[] = {4, 6, 8, 12, 16, 24, 32, 64, 128, 256, 512, 0};
   std::cout << "size            selfadjoint       generic";
 #ifdef BENCH_GMM

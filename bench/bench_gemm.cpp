@@ -159,7 +159,12 @@ EIGEN_DONT_INLINE void gemm(const A& a, const B& b, C& c) {
   c.noalias() += a * b;
 }
 
-int main(int argc, char** argv) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_gemm_main
+#endif
+
+int main(int argc, const char** argv) {
   std::ptrdiff_t l1 = internal::queryL1CacheSize();
   std::ptrdiff_t l2 = internal::queryTopLevelCacheSize();
   std::cout << "L1 cache size     = " << (l1 > 0 ? l1 / 1024 : -1) << " KB\n";

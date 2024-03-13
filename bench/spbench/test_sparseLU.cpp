@@ -14,7 +14,12 @@
 using namespace std;
 using namespace Eigen;
 
-int main(int argc, char **args) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_sparse_lu_main
+#endif
+
+int main(int argc, const char **args) {
   //   typedef complex<double> scalar;
   typedef double scalar;
   SparseMatrix<scalar, ColMajor> A;

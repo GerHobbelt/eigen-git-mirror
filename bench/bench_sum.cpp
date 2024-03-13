@@ -3,6 +3,11 @@
 using namespace Eigen;
 using namespace std;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_sum_main
+#endif
+
 int main() {
   typedef Matrix<SCALAR, Eigen::Dynamic, 1> Vec;
   Vec v(SIZE);

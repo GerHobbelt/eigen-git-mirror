@@ -75,6 +75,11 @@ void bench(int id, int rows, int size = Size) {
   results["BDCSVD"][id] = t_bdcsvd.best();
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_dense_solvers_main
+#endif
+
 int main() {
   labels.push_back("LLT");
   labels.push_back("LDLT");

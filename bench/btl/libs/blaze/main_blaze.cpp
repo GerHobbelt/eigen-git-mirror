@@ -22,6 +22,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_blaze_main
+#endif
+
 int main() {
   bench<Action_axpy<blaze_interface<REAL_TYPE> > >(MIN_AXPY, MAX_AXPY, NB_POINT);
   bench<Action_axpby<blaze_interface<REAL_TYPE> > >(MIN_AXPY, MAX_AXPY, NB_POINT);

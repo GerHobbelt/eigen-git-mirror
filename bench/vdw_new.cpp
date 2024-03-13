@@ -23,6 +23,11 @@ SCALAR E_VDW(const Vec &interactions1, const Vec &interactions2) {
   return (interactions2.cwise() / interactions1).cwise().cube().cwise().square().cwise().square().sum();
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_vdw_main
+#endif
+
 int main() {
   //
   //          1   2   3   4  ... (interactions)

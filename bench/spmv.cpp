@@ -36,7 +36,12 @@
 //
 // #endif
 
-int main(int argc, char *argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_spmv_main
+#endif
+
+int main(int argc, const char **argv) {
   int size = 10000;
   int rows = size;
   int cols = size;

@@ -27,6 +27,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_adv2_main
+#endif
+
 int main() {
   bench<Action_trisolve<eigen2_interface<REAL_TYPE> > >(MIN_MM, MAX_MM, NB_POINT);
   bench<Action_trisolve_matrix<eigen2_interface<REAL_TYPE> > >(MIN_MM, MAX_MM, NB_POINT);

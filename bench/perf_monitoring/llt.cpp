@@ -7,4 +7,9 @@ EIGEN_DONT_INLINE void llt(const Mat &A, const Mat &B, Mat &C) {
   Eigen::internal::llt_inplace<Mat::Scalar, Lower>::blocked(C);
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_mon_lit_main
+#endif
+
 int main(int argc, char **argv) { return main_gemm(argc, argv, llt); }

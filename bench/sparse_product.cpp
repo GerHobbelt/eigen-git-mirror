@@ -93,7 +93,12 @@ cs* cs_sorted_multiply2(const cs* a, const cs* b) {
 
 void bench_sort();
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_sparse_product_main
+#endif
+
+int main(int argc, const char** argv) {
   //   bench_sort();
 
   int rows = SIZE;

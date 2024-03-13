@@ -22,6 +22,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_linear3_main
+#endif
+
 int main() {
   bench<Action_axpy<eigen3_interface<REAL_TYPE> > >(MIN_AXPY, MAX_AXPY, NB_POINT);
   bench<Action_axpby<eigen3_interface<REAL_TYPE> > >(MIN_AXPY, MAX_AXPY, NB_POINT);

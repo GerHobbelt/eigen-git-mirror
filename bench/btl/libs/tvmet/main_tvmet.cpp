@@ -27,6 +27,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_banchmark_tvmet_main
+#endif
+
 int main() {
   bench_static<Action_axpy, tvmet_interface>();
   bench_static<Action_matrix_matrix_product, tvmet_interface>();

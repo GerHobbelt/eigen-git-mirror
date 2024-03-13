@@ -30,6 +30,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_tiny_eigen3_main
+#endif
+
 int main() {
   bench_static<Action_axpy, eigen2_interface>();
   bench_static<Action_matrix_matrix_product, eigen2_interface>();

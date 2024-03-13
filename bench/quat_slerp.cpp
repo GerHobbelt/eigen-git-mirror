@@ -120,6 +120,11 @@ EIGEN_DONT_INLINE Q slerp_gael(const Q& a, const Q& b, typename Q::Scalar t) {
   return Quaternion<Scalar>(scale0 * a.coeffs() + scale1 * b.coeffs());
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_quat_slerp_main
+#endif
+
 int main() {
   typedef double RefScalar;
   typedef float TestScalar;

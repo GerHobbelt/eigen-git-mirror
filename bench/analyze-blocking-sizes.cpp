@@ -704,7 +704,12 @@ void show_usage_and_exit(int argc, char* argv[], const vector<unique_ptr<action_
   exit(1);
 }
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_analyze_blocking_sizes_main
+#endif
+
+int main(int argc, const char** argv) {
   cout.precision(default_precision);
   cerr.precision(default_precision);
 

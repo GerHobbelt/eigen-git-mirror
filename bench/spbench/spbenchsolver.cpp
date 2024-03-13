@@ -23,7 +23,12 @@ void bench_printhelp() {
   cout << " --maxits <MaxIts> Sets the maximum number of iterations (default 1000) \n\n";
 }
 
-int main(int argc, char** args) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_spsolver_main
+#endif
+
+int main(int argc, const char** args) {
   bool help = (get_options(argc, args, "-h") || get_options(argc, args, "--help"));
   if (help) {
     bench_printhelp();

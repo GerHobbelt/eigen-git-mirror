@@ -30,7 +30,12 @@ void bench_eigengemm(MyMatrix& mc, const MyMatrix& ma, const MyMatrix& mb, int n
 void check_product(int M, int N, int K);
 void check_product(void);
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_blas_gemm_main
+#endif
+
+int main(int argc, const char** argv) {
 // disable SSE exceptions
 #ifdef __GNUC__
   {

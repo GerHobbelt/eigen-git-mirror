@@ -50,7 +50,12 @@ cs* cs_sorted_multiply(const cs* a, const cs* b) {
 }
 #endif
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_sparse_dense_product_main
+#endif
+
+int main(int argc, const char** argv) {
   int rows = SIZE;
   int cols = SIZE;
   float density = DENSITY;

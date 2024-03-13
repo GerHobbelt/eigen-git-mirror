@@ -3,7 +3,12 @@
 #include "BenchUtil.h"
 #include "basicbenchmark.h"
 
-int main(int argc, char *argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_basic_main
+#endif
+
+int main(int argc, const char **argv) {
   DISABLE_SSE_EXCEPTIONS();
 
 // this is the list of matrix type and size we want to bench:

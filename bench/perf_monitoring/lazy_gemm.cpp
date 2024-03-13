@@ -97,7 +97,12 @@ EIGEN_DONT_INLINE double bench_mnk(int m, int n, int k, int t) {
   return 0;
 }
 
-int main(int argc, char **argv) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_mon_lazy_gemm_main
+#endif
+
+int main(int argc, const char **argv) {
   std::vector<double> results;
 
   std::string filename = std::string("lazy_gemm_settings.txt");

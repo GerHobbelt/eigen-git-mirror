@@ -61,7 +61,12 @@ EIGEN_DONT_INLINE Scalar* setrand_ublas_compressed(const Coordinates& coords, co
 EIGEN_DONT_INLINE Scalar* setrand_ublas_genvec(const Coordinates& coords, const Values& vals);
 EIGEN_DONT_INLINE Scalar* setrand_mtl(const Coordinates& coords, const Values& vals);
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_sparse_setter_main
+#endif
+
+int main(int argc, const char** argv) {
   int rows = SIZE;
   int cols = SIZE;
   bool fullyrand = true;

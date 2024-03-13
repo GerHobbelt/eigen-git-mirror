@@ -24,6 +24,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_banchmark_mtl4_main
+#endif
+
 int main() {
   bench<Action_axpy<mtl4_interface<REAL_TYPE> > >(MIN_AXPY, MAX_AXPY, NB_POINT);
   bench<Action_axpby<mtl4_interface<REAL_TYPE> > >(MIN_AXPY, MAX_AXPY, NB_POINT);

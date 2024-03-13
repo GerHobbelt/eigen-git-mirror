@@ -13,6 +13,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_banchmark_t_matmat_main
+#endif
+
 int main() {
   bench<Action_matrix_matrix_product<tensor_interface<REAL_TYPE> > >(MIN_MM, MAX_MM, NB_POINT);
 

@@ -22,6 +22,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_vecmat2_main
+#endif
+
 int main() {
   bench<Action_matrix_vector_product<eigen2_interface<REAL_TYPE> > >(MIN_MV, MAX_MV, NB_POINT);
   bench<Action_atv_product<eigen2_interface<REAL_TYPE> > >(MIN_MV, MAX_MV, NB_POINT);

@@ -52,7 +52,12 @@ void fillMatrix(float density, int rows, int cols, EigenSparseTriMatrix &dst) {
   dst.endFill();
 }
 
-int main(int argc, char *argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_sparse_trisolver_main
+#endif
+
+int main(int argc, const char **argv) {
   int rows = SIZE;
   int cols = SIZE;
   float density = DENSITY;

@@ -265,7 +265,12 @@ void check_accuracy_var(int ef0, int ef1, int ed0, int ed1, int s) {
   //   double>()) << "\t" << bl2passNorm(vd.cast<long double>()) << "\n";
 }
 
-int main(int argc, char** argv) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_norm_main
+#endif
+
+int main(int argc, const char** argv) {
   int tries = 10;
   int iters = 100000;
   double y = 1.1345743233455785456788e12 * internal::random<double>();

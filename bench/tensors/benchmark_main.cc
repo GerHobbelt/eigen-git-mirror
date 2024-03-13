@@ -198,7 +198,13 @@ void StartBenchmarkTiming() {
     g_benchmark_start_time_ns = NanoTime();
   }
 }
-int main(int argc, char* argv[]) {
+
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_tensors_main
+#endif
+
+int main(int argc, const char** argv) {
   if (gBenchmarks().empty()) {
     fprintf(stderr, "No benchmarks registered!\n");
     exit(EXIT_FAILURE);

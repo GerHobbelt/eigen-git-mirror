@@ -45,6 +45,11 @@ void bench(const std::string& label) {
   std::cout << label << " move semantics: " << 1e3 * t.best(Eigen::CPU_TIMER) << " ms" << std::endl;
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_move_semantics_main
+#endif
+
 int main() {
   bench<float>("float");
   bench<double>("double");

@@ -17,7 +17,12 @@
 using namespace std;
 using namespace Eigen;
 
-int main(int argc, char **args) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_sp_solver_main
+#endif
+
+int main(int argc, const char **args) {
   SparseMatrix<double, ColMajor> A;
   typedef SparseMatrix<double, ColMajor>::Index Index;
   typedef Matrix<double, Dynamic, Dynamic> DenseMatrix;

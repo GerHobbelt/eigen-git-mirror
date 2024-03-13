@@ -559,7 +559,12 @@ struct measure_default_sizes_action_t : action_t {
   }
 };
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_blocking_sizes_main
+#endif
+
+int main(int argc, const char** argv) {
   double time_start = timer.getRealTime();
   cout.precision(4);
   cerr.precision(4);

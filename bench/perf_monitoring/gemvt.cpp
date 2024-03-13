@@ -2,4 +2,9 @@
 
 EIGEN_DONT_INLINE void gemv(const Mat &A, Vec &B, const Vec &C) { B.noalias() += A.transpose() * C; }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_mon_gemvt_main
+#endif
+
 int main(int argc, char **argv) { return main_gemv(argc, argv, gemv); }

@@ -162,6 +162,11 @@ void add_online_info_into_contributors_list(list<contributor>& contributors_list
   }
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_gen_credits_main
+#endif
+
 int main() {
   // parse the hg churn output files
   map<string, int> contributors_map_for_changedlines = contributors_map_from_churn_output("churn-changedlines.out");

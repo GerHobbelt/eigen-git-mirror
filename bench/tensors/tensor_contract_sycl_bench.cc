@@ -302,6 +302,11 @@ void contractionABT(const Device& device_, TensorIndex num_iters, TensorIndex m_
   device_.synchronize();
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_tensor_sycl_main
+#endif
+
 int main() {
   cl::sycl::gpu_selector selector;
   Eigen::QueueInterface queue(selector);

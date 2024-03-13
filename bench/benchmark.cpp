@@ -24,7 +24,11 @@ using namespace Eigen;
 #endif
 
 
-int main(int argc, char *argv[]) {
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_main
+#endif
+
+int main(int argc, const char **argv) {
   Matrix<SCALAR, MATSIZE, MATSIZE> I = Matrix<SCALAR, MATSIZE, MATSIZE>::Ones();
   Matrix<SCALAR, MATSIZE, MATSIZE> m;
   for (int i = 0; i < MATSIZE; i++)

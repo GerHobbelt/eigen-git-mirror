@@ -26,6 +26,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_tiny_blitz_main
+#endif
+
 int main() {
   bench_static<Action_axpy, tiny_blitz_interface>();
   bench_static<Action_matrix_matrix_product, tiny_blitz_interface>();

@@ -19,7 +19,12 @@ using namespace Eigen;
 #define REPEAT 100
 #endif
 
-int main(int argc, char *argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_x_main
+#endif
+
+int main(int argc, const char **argv) {
   MATTYPE I = MATTYPE::Ones(MATSIZE, MATSIZE);
   MATTYPE m(MATSIZE, MATSIZE);
   for (int i = 0; i < MATSIZE; i++)

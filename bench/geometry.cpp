@@ -89,7 +89,12 @@ EIGEN_DONT_INLINE void bench(const std::string& msg, const Transformation& t) {
   std::cout << "\n";
 }
 
-int main(int argc, char** argv) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_geom_main
+#endif
+
+int main(int argc, const char** argv) {
   Matrix<Scalar, 3, 4> mat34;
   mat34.setRandom();
   Transform<Scalar, 3, Isometry> iso3(mat34);

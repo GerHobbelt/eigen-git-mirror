@@ -36,6 +36,11 @@ void bench(const std::string& label) {
             << " M mul/s\n";
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_quat_mul_main
+#endif
+
 int main() {
   bench<Quaternionf>("float ");
   bench<Quaterniond>("double");

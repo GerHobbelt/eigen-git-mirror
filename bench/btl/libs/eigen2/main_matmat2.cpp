@@ -22,6 +22,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_matmat2_main
+#endif
+
 int main() {
   bench<Action_matrix_matrix_product<eigen2_interface<REAL_TYPE> > >(MIN_MM, MAX_MM, NB_POINT);
   //   bench<Action_ata_product<eigen2_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);

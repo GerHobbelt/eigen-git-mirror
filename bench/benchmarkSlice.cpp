@@ -15,7 +15,12 @@ using namespace Eigen;
 #define SCALAR float
 #endif
 
-int main(int argc, char *argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_slice_main
+#endif
+
+int main(int argc, const char **argv) {
   typedef Matrix<SCALAR, Eigen::Dynamic, Eigen::Dynamic> Mat;
   Mat m(100, 100);
   m.setRandom();

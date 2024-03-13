@@ -97,7 +97,12 @@ void bench(int nfft, bool fwd, bool unscaled = false, bool halfspec = false) {
   cout << " NFFT=" << nfft << "  " << (double(1e-6 * nfft * nits) / timer.value()) << " MS/s  " << mflops << "MFLOPS\n";
 }
 
-int main(int argc, char** argv) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_fft_main
+#endif
+
+int main(int argc, const char** argv) {
   bench<complex<float> >(NFFT, true);
   bench<complex<float> >(NFFT, false);
   bench<float>(NFFT, true);

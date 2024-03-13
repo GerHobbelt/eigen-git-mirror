@@ -14,6 +14,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_banchmark_t_linear_main
+#endif
+
 int main() {
   bench<Action_axpy<tensor_interface<REAL_TYPE> > >(MIN_AXPY, MAX_AXPY, NB_POINT);
   bench<Action_axpby<tensor_interface<REAL_TYPE> > >(MIN_AXPY, MAX_AXPY, NB_POINT);

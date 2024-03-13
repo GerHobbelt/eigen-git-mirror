@@ -52,7 +52,12 @@ __attribute__((noinline)) void bench_reverse(const MatrixType& m) {
   if (acc == 123) std::cout << acc;
 }
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_reverse_main
+#endif
+
+int main(int argc, const char** argv) {
   const int dynsizes[] = {4, 6, 8, 16, 24, 32, 49, 64, 128, 256, 512, 900, 0};
   std::cout << "size            no sqrt                           standard";
   //   #ifdef BENCH_GSL

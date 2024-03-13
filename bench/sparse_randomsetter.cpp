@@ -66,7 +66,12 @@ void dostuff(const char* name, EigenSparseMatrix& sm1) {
   std::cout << "  back: \t" << t.value() << "\n";
 }
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_sparse_randomsetter_main
+#endif
+
+int main(int argc, const char** argv) {
   int rows = SIZE;
   int cols = SIZE;
   float density = DENSITY;

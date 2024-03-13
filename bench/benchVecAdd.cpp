@@ -23,7 +23,12 @@ __attribute__ ((noinline)) static void benchVec(Scalar* a, Scalar* b, Scalar* c,
 __attribute__ ((noinline)) static void benchVec(MatrixXf& a, MatrixXf& b, MatrixXf& c);
 __attribute__ ((noinline)) static void benchVec(VectorXf& a, VectorXf& b, VectorXf& c);
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_vecadd_main
+#endif
+
+int main(int argc, const char** argv) {
   int size = SIZE * 8;
   int size2 = size * size;
   Scalar* a = internal::aligned_new<Scalar>(size2);

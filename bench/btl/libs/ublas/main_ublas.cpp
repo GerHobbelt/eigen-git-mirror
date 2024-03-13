@@ -24,6 +24,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_ublas_main
+#endif
+
 int main() {
   bench<Action_axpy<ublas_interface<REAL_TYPE> > >(MIN_AXPY, MAX_AXPY, NB_POINT);
   bench<Action_axpby<ublas_interface<REAL_TYPE> > >(MIN_AXPY, MAX_AXPY, NB_POINT);

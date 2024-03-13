@@ -157,6 +157,11 @@ void eigen33(const Matrix& mat, Matrix& evecs, Vector& evals) {
   evals.array() += shift;
 }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_eig33_main
+#endif
+
 int main() {
   BenchTimer t;
   int tries = 10;

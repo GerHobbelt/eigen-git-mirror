@@ -15,6 +15,11 @@ using namespace std;
               << (int*)(abcd[2]) << " " << (int*)(abcd[3]) << " " << std::endl;                       \
   }
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_check_cache_queries_main
+#endif
+
 int main() {
   cout << "Eigen's L1    = " << internal::queryL1CacheSize() << endl;
   cout << "Eigen's L2/L3 = " << internal::queryTopLevelCacheSize() << endl;

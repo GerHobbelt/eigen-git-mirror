@@ -31,6 +31,11 @@
 
 BTL_MAIN;
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_blitz_main
+#endif
+
 int main() {
   bench<Action_matrix_vector_product<blitz_interface<REAL_TYPE> > >(MIN_MV, MAX_MV, NB_POINT);
   bench<Action_atv_product<blitz_interface<REAL_TYPE> > >(MIN_MV, MAX_MV, NB_POINT);

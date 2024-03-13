@@ -81,7 +81,12 @@ struct test_transform {
     test_transform<Func, Trans, Trans>::run();                         \
   }
 
-int main(int argc, char* argv[]) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_geometry_main
+#endif
+
+int main(int argc, const char** argv) {
   cout << "vec = trans * vec" << endl;
   run_vec(TV, float, Isometry, AutoAlign, 3);
   run_vec(TV, float, Isometry, DontAlign, 3);

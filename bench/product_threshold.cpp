@@ -157,6 +157,11 @@ struct print_n<END> {
   static void run() {}
 };
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main eigen_bench_product_threshold_main
+#endif
+
 int main() {
   loop_on_k<1, 1, 1>::run();
 
