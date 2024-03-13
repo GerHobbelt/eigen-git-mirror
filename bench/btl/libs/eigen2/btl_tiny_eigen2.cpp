@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 #include "utilities.h"
-#include "eigen3_interface.hh"
+#include "eigen2_interface.hh"
 #include "static/bench_static.hh"
 #include "action_matrix_vector_product.hh"
 #include "action_matrix_matrix_product.hh"
