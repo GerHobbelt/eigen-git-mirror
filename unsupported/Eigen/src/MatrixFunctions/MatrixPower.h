@@ -538,7 +538,7 @@ template <typename MatrixType>
 template <typename ResultType>
 void MatrixPower<MatrixType>::computeFracPower(ResultType& res, RealScalar p) {
   Block<ComplexMatrix, Dynamic, Dynamic> blockTp(m_fT, 0, 0, m_rank, m_rank);
-  eigen_assert(m_conditionNumber);
+  eigen_assert(!!m_conditionNumber);
   eigen_assert(m_rank + m_nulls == rows());
 
   MatrixPowerAtomic<ComplexMatrix>(m_T.topLeftCorner(m_rank, m_rank), p).compute(blockTp);
