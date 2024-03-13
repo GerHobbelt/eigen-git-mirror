@@ -75,7 +75,7 @@ EIGEN_DONT_INLINE Q slerp_rw(const Q& a, const Q& b, typename Q::Scalar t) {
   Scalar d = a.dot(b);
   Scalar theta;
   if (d < 0.0)
-    theta = /*M_PI -*/ Scalar(2) * std::asin((a.coeffs() + b.coeffs()).norm() / 2);
+    theta = /*EIGEN_PI -*/ Scalar(2) * std::asin((a.coeffs() + b.coeffs()).norm() / 2);
   else
     theta = Scalar(2) * std::asin((a.coeffs() - b.coeffs()).norm() / 2);
 
@@ -98,10 +98,10 @@ EIGEN_DONT_INLINE Q slerp_gael(const Q& a, const Q& b, typename Q::Scalar t) {
   Scalar theta;
   //   theta = Scalar(2) * atan2((a.coeffs()-b.coeffs()).norm(),(a.coeffs()+b.coeffs()).norm());
   //   if (d<0.0)
-  //     theta = M_PI-theta;
+  //     theta = EIGEN_PI-theta;
 
   if (d < 0.0)
-    theta = /*M_PI -*/ Scalar(2) * std::asin((-a.coeffs() - b.coeffs()).norm() / 2);
+    theta = /*EIGEN_PI -*/ Scalar(2) * std::asin((-a.coeffs() - b.coeffs()).norm() / 2);
   else
     theta = Scalar(2) * std::asin((a.coeffs() - b.coeffs()).norm() / 2);
 
