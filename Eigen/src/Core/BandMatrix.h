@@ -95,8 +95,8 @@ class BandMatrixBase : public EigenBase<Derived> {
       DiagonalSize =
           (RowsAtCompileTime == Dynamic || ColsAtCompileTime == Dynamic)
               ? Dynamic
-              : (ActualIndex < 0 ? min_size_prefer_dynamic(ColsAtCompileTime, RowsAtCompileTime + ActualIndex)
-                                 : min_size_prefer_dynamic(RowsAtCompileTime, ColsAtCompileTime - ActualIndex))
+              : (ActualIndex < 0 ? min_size_prefer_dynamic(ColsAtCompileTime, int(RowsAtCompileTime) + int(ActualIndex))
+                                 : min_size_prefer_dynamic(RowsAtCompileTime, int(ColsAtCompileTime) - int(ActualIndex)))
     };
     typedef Block<CoefficientsType, 1, DiagonalSize> BuildType;
     typedef std::conditional_t<Conjugate, CwiseUnaryOp<internal::scalar_conjugate_op<Scalar>, BuildType>, BuildType>
