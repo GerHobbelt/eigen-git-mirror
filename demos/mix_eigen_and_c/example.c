@@ -8,10 +8,10 @@
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "binary_library.h"
-#include "stdio.h"
+#include <stdio.h>
 
 void demo_MatrixXd() {
-  struct C_MatrixXd *matrix1, *matrix2, *result;
+  struct C_MatrixXd *matrix1, *matrix2;
   printf("*** demo_MatrixXd ***\n");
 
   matrix1 = MatrixXd_new(3, 3);
