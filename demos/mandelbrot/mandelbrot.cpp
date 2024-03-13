@@ -7,8 +7,12 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "mandelbrot.h"
 #include <iostream>
+
+#if !defined(BUILD_MONOLITHIC)    // we don't do Qt, period.
+
+#include "mandelbrot.h"
+
 #include <QtGui/QPainter>
 #include <QtGui/QImage>
 #include <QtGui/QMouseEvent>
@@ -194,3 +198,5 @@ int main(int argc, char *argv[]) {
 }
 
 #include "mandelbrot.moc"
+
+#endif

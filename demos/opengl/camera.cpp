@@ -7,12 +7,18 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "camera.h"
+#if !defined(BUILD_MONOLITHIC)    // we don't do Qt, period.
 
+#if defined(_MSC_VER)
+#include <windows.h>
+#endif
 #include "gpuhelper.h"
 #include <GL/glu.h>
 
+#include "camera.h"
+
 #include "Eigen/LU"
+
 using namespace Eigen;
 
 Camera::Camera() : mViewIsUptodate(false), mProjIsUptodate(false) {
@@ -217,3 +223,5 @@ Vector3f Camera::unProject(const Vector2f& uv, float depth, const Matrix4f& invM
   Vector4f b = invModelview * Vector4f(a.x(), a.y(), a.z(), 1.);
   return Vector3f(b.x(), b.y(), b.z());
 }
+
+#endif

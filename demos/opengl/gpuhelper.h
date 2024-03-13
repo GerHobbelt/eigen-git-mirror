@@ -11,6 +11,9 @@
 #define EIGEN_GPUHELPER_H
 
 #include <Eigen/Geometry>
+#if defined(_MSC_VER)
+#include <windows.h>
+#endif
 #include <GL/gl.h>
 #include <vector>
 

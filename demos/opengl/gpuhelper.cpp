@@ -7,6 +7,8 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#if !defined(BUILD_MONOLITHIC)    // we don't do Qt, period.
+
 #include "gpuhelper.h"
 #include "icosphere.h"
 #include <GL/glu.h>
@@ -125,3 +127,5 @@ void GpuHelper::drawUnitSphere(int level) {
   static IcoSphere sphere;
   sphere.draw(level);
 }
+
+#endif

@@ -7,7 +7,6 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "quaternion_demo.h"
 #include "icosphere.h"
 
 #include <Eigen/Geometry>
@@ -15,6 +14,11 @@
 #include <Eigen/LU>
 
 #include <iostream>
+
+#if !defined(BUILD_MONOLITHIC)    // we don't do Qt, period.
+
+#include "quaternion_demo.h"
+
 #include <QEvent>
 #include <QMouseEvent>
 #include <QInputDialog>
@@ -584,3 +588,5 @@ int main(int argc, char* argv[]) {
 }
 
 #include "quaternion_demo.moc"
+
+#endif
