@@ -1,4 +1,5 @@
 #include <Eigen/Matrix>
+#include <iostream>
 
 
 #if defined(BUILD_MONOLITHIC)
