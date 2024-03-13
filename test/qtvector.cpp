@@ -11,6 +11,9 @@
 #define EIGEN_WORK_AROUND_QT_BUG_CALLING_WRONG_OPERATOR_NEW_FIXED_IN_QT_4_5
 
 #include "main.h"
+
+#if !defined(BUILD_MONOLITHIC)       // we don't do Qt, period.
+
 #include <QtCore/QVector>
 #include <Eigen/Geometry>
 #include <Eigen/QtAlignedMalloc>
@@ -140,3 +143,5 @@ EIGEN_DECLARE_TEST(qtvector) {
   CALL_SUBTEST(check_qtvector_quaternion(Quaternionf()));
   CALL_SUBTEST(check_qtvector_quaternion(Quaternionf()));
 }
+
+#endif
