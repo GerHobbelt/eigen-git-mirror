@@ -13,6 +13,7 @@
 #include "binary_library.h"
 
 #include <Eigen/Core>
+#include <iostream>
 
 using namespace Eigen;
 
