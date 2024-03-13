@@ -45,7 +45,7 @@ struct packetwise_redux_traits {
   enum {
     OuterSize = int(Evaluator::IsRowMajor) ? Evaluator::RowsAtCompileTime : Evaluator::ColsAtCompileTime,
     Cost = OuterSize == Dynamic ? HugeCost
-                                : OuterSize * Evaluator::CoeffReadCost + (OuterSize - 1) * functor_traits<Func>::Cost,
+                                : int(OuterSize) * int(Evaluator::CoeffReadCost) + (int(OuterSize) - 1) * int(functor_traits<Func>::Cost),
     Unrolling = Cost <= EIGEN_UNROLLING_LIMIT ? CompleteUnrolling : NoUnrolling
   };
 };

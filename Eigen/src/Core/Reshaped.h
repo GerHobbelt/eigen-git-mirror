@@ -72,7 +72,7 @@ struct traits<Reshaped<XprType, Rows, Cols, Order> > : traits<XprType> {
                       ((evaluator<XprType>::Flags & LinearAccessBit) == LinearAccessBit),
 
     MaskPacketAccessBit =
-        (InnerSize == Dynamic || (InnerSize % packet_traits<Scalar>::size) == 0) && (InnerStrideAtCompileTime == 1)
+        (InnerSize == Dynamic || (int(InnerSize) % packet_traits<Scalar>::size) == 0) && (int(InnerStrideAtCompileTime) == 1)
             ? PacketAccessBit
             : 0,
     // MaskAlignedBit = ((OuterStrideAtCompileTime!=Dynamic) && (((OuterStrideAtCompileTime * int(sizeof(Scalar))) % 16)

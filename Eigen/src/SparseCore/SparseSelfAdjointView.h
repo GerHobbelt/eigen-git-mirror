@@ -496,8 +496,8 @@ void permute_symm_to_symm(const MatrixType& mat,
   enum {
     SrcOrder = MatrixType::IsRowMajor ? RowMajor : ColMajor,
     StorageOrderMatch = int(SrcOrder) == int(DstOrder),
-    DstMode = DstOrder == RowMajor ? (DstMode_ == Upper ? Lower : Upper) : DstMode_,
-    SrcMode = SrcOrder == RowMajor ? (SrcMode_ == Upper ? Lower : Upper) : SrcMode_
+    DstMode = DstOrder == RowMajor ? int(DstMode_ == int(Upper) ? Lower : Upper) : DstMode_,
+    SrcMode = SrcOrder == RowMajor ? int(SrcMode_ == int(Upper) ? Lower : Upper) : SrcMode_
   };
 
   MatEval matEval(mat);
