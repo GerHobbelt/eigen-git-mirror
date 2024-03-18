@@ -12,6 +12,13 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
+#if defined(_MSC_VER)
+#include <windows.h>  // fix weird clash in system header files on Win32/64 due to redef in system cstddef header file: Windows Kits\10\Include\10.0.22621.0\shared\rpcndr.h(203,9): error C2872: 'byte': ambiguous symbol
+#include <cstddef>
+#undef max
+#undef min
+#endif
+
 #include <stdlib.h>
 // # include <iostream> ok for gcc3.01
 #include <iostream>
