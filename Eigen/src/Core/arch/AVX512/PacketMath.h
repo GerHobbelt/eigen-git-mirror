@@ -156,6 +156,8 @@ struct packet_traits<double> : default_packet_traits {
     HasBlend = 1,
     HasSqrt = 1,
     HasRsqrt = 1,
+    HasSin = EIGEN_FAST_MATH,
+    HasCos = EIGEN_FAST_MATH,
     HasLog = 1,
     HasExp = 1,
     HasATan = 1,
@@ -1285,7 +1287,11 @@ EIGEN_STRONG_INLINE int64_t pfirst<Packet8l>(const Packet8l& a) {
 }
 template <>
 EIGEN_STRONG_INLINE int pfirst<Packet16i>(const Packet16i& a) {
+#if EIGEN_GNUC_STRICT_LESS_THAN(11, 0, 0)
+  return _mm_cvtsi128_si32(_mm512_castsi512_si128(a));
+#else
   return _mm512_cvtsi512_si32(a);
+#endif
 }
 
 template <>
@@ -2144,23 +2150,24 @@ EIGEN_DEVICE_FUNC inline void ptranspose(PacketBlock<Packet16i, 4>& kernel) {
   PACK_OUTPUT_I32_2(kernel.packet, tmp.packet, 3, 1);
 }
 
+template <size_t N>
+EIGEN_STRONG_INLINE int avx512_blend_mask(const Selector<N>& ifPacket) {
+  alignas(__m128i) uint8_t aux[sizeof(__m128i)];
+  for (size_t i = 0; i < N; i++) aux[i] = static_cast<uint8_t>(ifPacket.select[i]);
+  __m128i paux = _mm_sub_epi8(_mm_setzero_si128(), _mm_load_si128(reinterpret_cast<const __m128i*>(aux)));
+  return _mm_movemask_epi8(paux);
+}
+
 template <>
 EIGEN_STRONG_INLINE Packet16f pblend(const Selector<16>& ifPacket, const Packet16f& thenPacket,
                                      const Packet16f& elsePacket) {
-  __mmask16 m = (ifPacket.select[0]) | (ifPacket.select[1] << 1) | (ifPacket.select[2] << 2) |
-                (ifPacket.select[3] << 3) | (ifPacket.select[4] << 4) | (ifPacket.select[5] << 5) |
-                (ifPacket.select[6] << 6) | (ifPacket.select[7] << 7) | (ifPacket.select[8] << 8) |
-                (ifPacket.select[9] << 9) | (ifPacket.select[10] << 10) | (ifPacket.select[11] << 11) |
-                (ifPacket.select[12] << 12) | (ifPacket.select[13] << 13) | (ifPacket.select[14] << 14) |
-                (ifPacket.select[15] << 15);
+  __mmask16 m = avx512_blend_mask(ifPacket);
   return _mm512_mask_blend_ps(m, elsePacket, thenPacket);
 }
 template <>
 EIGEN_STRONG_INLINE Packet8d pblend(const Selector<8>& ifPacket, const Packet8d& thenPacket,
                                     const Packet8d& elsePacket) {
-  __mmask8 m = (ifPacket.select[0]) | (ifPacket.select[1] << 1) | (ifPacket.select[2] << 2) |
-               (ifPacket.select[3] << 3) | (ifPacket.select[4] << 4) | (ifPacket.select[5] << 5) |
-               (ifPacket.select[6] << 6) | (ifPacket.select[7] << 7);
+  __mmask8 m = avx512_blend_mask(ifPacket);
   return _mm512_mask_blend_pd(m, elsePacket, thenPacket);
 }
 
