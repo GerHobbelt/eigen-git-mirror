@@ -144,7 +144,7 @@
 #endif
 
 // For the record, here is a table summarizing the possible values for EIGEN_COMP_MSVC:
-//  name        ver   MSC_VER
+//  name        ver   _MSC_VER
 //  2015        14      1900
 //  "15"        15      1900
 //  2017-14.1   15.0    1910
