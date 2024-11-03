@@ -131,8 +131,8 @@ struct digamma_impl_maybe_poly {
 template <>
 struct digamma_impl_maybe_poly<float> {
   EIGEN_DEVICE_FUNC static EIGEN_STRONG_INLINE float run(const float s) {
-    const float A[] = {-4.16666666666666666667E-3f, 3.96825396825396825397E-3f, -8.33333333333333333333E-3f,
-                       8.33333333333333333333E-2f};
+    constexpr float A[] = {-4.16666666666666666667E-3f, 3.96825396825396825397E-3f, -8.33333333333333333333E-3f,
+                           8.33333333333333333333E-2f};
 
     float z;
     if (s < 1.0e8f) {
@@ -146,9 +146,9 @@ struct digamma_impl_maybe_poly<float> {
 template <>
 struct digamma_impl_maybe_poly<double> {
   EIGEN_DEVICE_FUNC static EIGEN_STRONG_INLINE double run(const double s) {
-    const double A[] = {8.33333333333333333333E-2,  -2.10927960927960927961E-2, 7.57575757575757575758E-3,
-                        -4.16666666666666666667E-3, 3.96825396825396825397E-3,  -8.33333333333333333333E-3,
-                        8.33333333333333333333E-2};
+    constexpr double A[] = {8.33333333333333333333E-2,  -2.10927960927960927961E-2, 7.57575757575757575758E-3,
+                            -4.16666666666666666667E-3, 3.96825396825396825397E-3,  -8.33333333333333333333E-3,
+                            8.33333333333333333333E-2};
 
     double z;
     if (s < 1.0e17) {
@@ -274,54 +274,38 @@ struct digamma_impl {
  ****************************************************************************/
 
 /** \internal \returns the error function of \a a (coeff-wise)
-    Doesn't do anything fancy, just a 9/12-degree rational interpolant which
-    is accurate to 3 ulp for normalized floats in the range [-c;c], where
-    c = erfinv(1-2^-23), outside of which x should be +/-1 in single precision.
-    Strictly speaking c should be erfinv(1-2^-24), but we clamp slightly earlier
-    to avoid returning values greater than 1.
+    This uses a 11/10-degree rational interpolantand is accurate to 3 ulp for
+    normalized floats.
 
-    This implementation works on both scalars and Ts.
+    This implementation works on both scalars and SIMD "packets".
 */
 template <typename T>
 EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T generic_fast_erf_float(const T& x) {
-  constexpr float kErfInvOneMinusHalfULP = 3.832506856900711f;
-  const T clamp = pcmp_le(pset1<T>(kErfInvOneMinusHalfULP), pabs(x));
   // The monomial coefficients of the numerator polynomial (odd).
-  const T alpha_1 = pset1<T>(1.128379143519084f);
-  const T alpha_3 = pset1<T>(0.18520832239976145f);
-  const T alpha_5 = pset1<T>(0.050955695062380861f);
-  const T alpha_7 = pset1<T>(0.0034082910107109506f);
-  const T alpha_9 = pset1<T>(0.00022905065861350646f);
+  constexpr float alpha[] = {2.123732201653183437883853912353515625e-06f, 2.861979592125862836837768554687500000e-04f,
+                             3.658048342913389205932617187500000000e-03f, 5.243302136659622192382812500000000000e-02f,
+                             1.874160766601562500000000000000000000e-01f, 1.128379106521606445312500000000000000e+00f};
 
   // The monomial coefficients of the denominator polynomial (even).
-  const T beta_0 = pset1<T>(1.0f);
-  const T beta_2 = pset1<T>(0.49746925110067538f);
-  const T beta_4 = pset1<T>(0.11098505178285362f);
-  const T beta_6 = pset1<T>(0.014070470171167667f);
-  const T beta_8 = pset1<T>(0.0010179625278914885f);
-  const T beta_10 = pset1<T>(0.000023547966471313185f);
-  const T beta_12 = pset1<T>(-1.1791602954361697e-7f);
+  constexpr float beta[] = {3.89185734093189239501953125000e-05f, 1.14329601638019084930419921875e-03f,
+                            1.47520881146192550659179687500e-02f, 1.12945675849914550781250000000e-01f,
+                            4.99425798654556274414062500000e-01f, 1.0f};
 
   // Since the polynomials are odd/even, we need x^2.
-  const T x2 = pmul(x, x);
+  // Since erf(4) == 1 in float, we clamp x^2 to 16 to avoid
+  // computing Inf/Inf below.
+  const T x2 = pmin(pset1<T>(16.0f), pmul(x, x));
 
   // Evaluate the numerator polynomial p.
-  T p = pmadd(x2, alpha_9, alpha_7);
-  p = pmadd(x2, p, alpha_5);
-  p = pmadd(x2, p, alpha_3);
-  p = pmadd(x2, p, alpha_1);
+  T p = ppolevl<T, 5>::run(x2, alpha);
   p = pmul(x, p);
 
   // Evaluate the denominator polynomial p.
-  T q = pmadd(x2, beta_12, beta_10);
-  q = pmadd(x2, q, beta_8);
-  q = pmadd(x2, q, beta_6);
-  q = pmadd(x2, q, beta_4);
-  q = pmadd(x2, q, beta_2);
-  q = pmadd(x2, q, beta_0);
+  T q = ppolevl<T, 5>::run(x2, beta);
+  const T r = pdiv(p, q);
 
-  // Divide the numerator by the denominator.
-  return pselect(clamp, psign(x), pdiv(p, q));
+  // Clamp to [-1:1].
+  return pmax(pmin(r, pset1<T>(1.0f)), pset1<T>(-1.0f));
 }
 
 template <typename T>
@@ -478,17 +462,17 @@ EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE float flipsign<float>(const float& should_
 template <typename T, typename ScalarType>
 EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T generic_ndtri_gt_exp_neg_two(const T& b) {
   const ScalarType p0[] = {ScalarType(-5.99633501014107895267e1), ScalarType(9.80010754185999661536e1),
-                           ScalarType(-5.66762857469070293439e1), ScalarType(1.39312609387279679503e1),
-                           ScalarType(-1.23916583867381258016e0)};
+                               ScalarType(-5.66762857469070293439e1), ScalarType(1.39312609387279679503e1),
+                               ScalarType(-1.23916583867381258016e0)};
   const ScalarType q0[] = {ScalarType(1.0),
-                           ScalarType(1.95448858338141759834e0),
-                           ScalarType(4.67627912898881538453e0),
-                           ScalarType(8.63602421390890590575e1),
-                           ScalarType(-2.25462687854119370527e2),
-                           ScalarType(2.00260212380060660359e2),
-                           ScalarType(-8.20372256168333339912e1),
-                           ScalarType(1.59056225126211695515e1),
-                           ScalarType(-1.18331621121330003142e0)};
+                               ScalarType(1.95448858338141759834e0),
+                               ScalarType(4.67627912898881538453e0),
+                               ScalarType(8.63602421390890590575e1),
+                               ScalarType(-2.25462687854119370527e2),
+                               ScalarType(2.00260212380060660359e2),
+                               ScalarType(-8.20372256168333339912e1),
+                               ScalarType(1.59056225126211695515e1),
+                               ScalarType(-1.18331621121330003142e0)};
   const T sqrt2pi = pset1<T>(ScalarType(2.50662827463100050242e0));
   const T half = pset1<T>(ScalarType(0.5));
   T c, c2, ndtri_gt_exp_neg_two;
