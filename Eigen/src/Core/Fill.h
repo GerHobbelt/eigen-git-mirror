@@ -34,10 +34,25 @@ struct eigen_fill_helper<Block<Xpr, BlockRows, BlockCols, /*InnerPanel*/ false>>
     : std::integral_constant<bool, eigen_fill_helper<Xpr>::value &&
                                        (Xpr::IsRowMajor ? (BlockRows == 1) : (BlockCols == 1))> {};
 
-template <typename Xpr, int Options, typename StrideType>
-struct eigen_fill_helper<Map<Xpr, Options, StrideType>>
+template <typename Xpr, int Options>
+struct eigen_fill_helper<Map<Xpr, Options, Stride<0, 0>>> : eigen_fill_helper<Xpr> {};
+
+template <typename Xpr, int Options, int OuterStride_>
+struct eigen_fill_helper<Map<Xpr, Options, Stride<OuterStride_, 0>>>
     : std::integral_constant<bool, eigen_fill_helper<Xpr>::value &&
-                                       (evaluator<Map<Xpr, Options, StrideType>>::Flags & LinearAccessBit)> {};
+                                       enum_eq_not_dynamic(OuterStride_, Xpr::InnerSizeAtCompileTime)> {};
+
+template <typename Xpr, int Options, int OuterStride_>
+struct eigen_fill_helper<Map<Xpr, Options, Stride<OuterStride_, 1>>>
+    : eigen_fill_helper<Map<Xpr, Options, Stride<OuterStride_, 0>>> {};
+
+template <typename Xpr, int Options, int InnerStride_>
+struct eigen_fill_helper<Map<Xpr, Options, InnerStride<InnerStride_>>>
+    : eigen_fill_helper<Map<Xpr, Options, Stride<0, InnerStride_>>> {};
+
+template <typename Xpr, int Options, int OuterStride_>
+struct eigen_fill_helper<Map<Xpr, Options, OuterStride<OuterStride_>>>
+    : eigen_fill_helper<Map<Xpr, Options, Stride<OuterStride_, 0>>> {};
 
 template <typename Xpr, bool use_fill = eigen_fill_helper<Xpr>::value>
 struct eigen_fill_impl {
@@ -80,11 +95,14 @@ struct eigen_zero_impl<Xpr, /*use_memset*/ true> {
   static constexpr size_t max_bytes = (std::numeric_limits<std::ptrdiff_t>::max)();
   static EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void run(Xpr& dst) {
     const size_t num_bytes = dst.size() * sizeof(Scalar);
+    if (num_bytes == 0) return;
+    void* dst_ptr = static_cast<void*>(dst.data());
 #ifndef EIGEN_NO_DEBUG
     if (num_bytes > max_bytes) throw_std_bad_alloc();
+    eigen_assert((dst_ptr != nullptr) && "null pointer dereference error!");
 #endif
     EIGEN_USING_STD(memset);
-    memset(dst.data(), 0, num_bytes);
+    memset(dst_ptr, 0, num_bytes);
   }
 };
 
