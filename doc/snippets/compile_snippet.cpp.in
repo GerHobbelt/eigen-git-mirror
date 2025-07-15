@@ -8,12 +8,8 @@ static bool eigen_did_assert = false;
 
 #include <iostream>
 #include <cassert>
-#include <Eigen/Eigen>
-
-#ifdef M_PI
-#undef M_PI
-#endif
-#define M_PI please_use_EIGEN_PI_instead_of_M_PI
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
 
 using namespace Eigen;
 using namespace std;

@@ -57,7 +57,8 @@ class FancySpheres {
       }
     }
 
-    static const float angles[10] = {0, 0, EIGEN_PI, 0. * EIGEN_PI, EIGEN_PI, 0.5 * EIGEN_PI, EIGEN_PI, 1. * EIGEN_PI, EIGEN_PI, 1.5 * EIGEN_PI};
+    static const float angles[10] = {
+        0, 0, EIGEN_PI, 0. * EIGEN_PI, EIGEN_PI, 0.5 * EIGEN_PI, EIGEN_PI, 1. * EIGEN_PI, EIGEN_PI, 1.5 * EIGEN_PI};
 
     // generate other levels
     int start = 1;

@@ -42,7 +42,11 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
       : env_(env),
         num_threads_(num_threads),
         allow_spinning_(allow_spinning),
-        spin_count_(0),
+        spin_count_(
+            // TODO(dvyukov,rmlarsen): The time spent in NonEmptyQueueIndex() is proportional to num_threads_ and
+            // we assume that new work is scheduled at a constant rate, so we divide `kSpintCount` by number of
+            // threads and number of spinning threads. The constant was picked based on a fair dice roll, tune it.
+            allow_spinning && num_threads > 0 ? kSpinCount / kMaxSpinningThreads / num_threads : 0),
         thread_data_(num_threads),
         all_coprimes_(num_threads),
         waiters_(num_threads),
@@ -152,8 +156,12 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   // Tries to assign work to the current task.
   void MaybeGetTask(Task* t) {
     PerThread* pt = GetPerThread();
-    Queue& q = thread_data_[pt->thread_id].queue;
-    if (*t = q.PopFront(); t->f) return;
+    const int thread_id = pt->thread_id;
+    // If we are not a worker thread of this pool, we can't get any work.
+    if (thread_id < 0) return;
+    Queue& q = thread_data_[thread_id].queue;
+    *t = q.PopFront();
+    if (t->f) return;
     if (num_threads_ == 1) {
       // For num_threads_ == 1 there is no point in going through the expensive
       // steal loop. Moreover, since NonEmptyQueueIndex() calls PopBack() on the
@@ -176,7 +184,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
           // steal one more time, to make sure that this task will be
           // executed. We will not necessarily find it, because it might
           // have been already stolen by some other thread.
-          if (has_no_notify_task && !t->f) *t = q.PopFront();
+          if (has_no_notify_task && !t->f) *t = GlobalSteal();
         }
       }
     }
@@ -310,7 +318,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   Environment env_;
   const int num_threads_;
   const bool allow_spinning_;
-  int spin_count_;
+  const int spin_count_;
   MaxSizeVector<ThreadData> thread_data_;
   MaxSizeVector<MaxSizeVector<unsigned>> all_coprimes_;
   MaxSizeVector<EventCount::Waiter> waiters_;
@@ -345,12 +353,6 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     pt->pool = this;
     pt->rand = GlobalThreadIdHash();
     pt->thread_id = thread_id;
-    // TODO(dvyukov,rmlarsen): The time spent in NonEmptyQueueIndex() is
-    // proportional to num_threads_ and we assume that new work is scheduled
-    // at a constant rate, so we divide `kSpintCount` by number of threads
-    // and number of spinning threads. The constant was picked based on a
-    // fair dice roll, tune it.
-    spin_count_ = allow_spinning_ && num_threads_ > 0 ? kSpinCount / kMaxSpinningThreads / num_threads_ : 0;
     Task t;
     while (!cancelled_.load(std::memory_order_relaxed)) {
       MaybeGetTask(&t);

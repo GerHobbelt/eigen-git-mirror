@@ -1,9 +1,4 @@
 #include <iostream>
-struct init {
-  init() { std::cout << "[init]\n"; }
-};
-init init_obj;
-// [init]
 #include <Eigen/Dense>
 
 
@@ -12,6 +7,7 @@ init init_obj;
 #endif
 
 int main() {
+  std::cout << "[init]\n";
   Eigen::MatrixXd A(2, 2);
   A << 2, -1, 1, 3;
   std::cout << "Here is the input matrix A before decomposition:\n" << A << "\n";
