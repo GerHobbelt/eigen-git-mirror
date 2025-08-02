@@ -12,6 +12,8 @@
 // IWYU pragma: private
 #include "./InternalHeaderCheck.h"
 
+#include <iostream>
+
 namespace Eigen {
 /**
  * Get the fill-reducing ordering from the METIS package
