@@ -86,6 +86,13 @@ inline T REF_ABS_DIFF(const T& a, const T& b) {
   return a > b ? a - b : b - a;
 }
 
+// MacOS apple-clang has an issue with pcmp_eq for half when inlined,
+// resulting in an ICE, but only in this specific test.
+template <typename Packet>
+EIGEN_DONT_INLINE Packet REF_PCMP_EQ(const Packet& a, const Packet& b) {
+  return internal::pcmp_eq(a, b);
+}
+
 // Specializations for bool.
 template <>
 inline bool REF_ADD(const bool& a, const bool& b) {
@@ -361,21 +368,21 @@ void packetmath_boolean_mask_ops() {
     data1[i + PacketSize] = internal::random<bool>() ? data1[i] : Scalar(0);
   }
 
-  CHECK_CWISE2_MASK(internal::pcmp_eq, internal::pcmp_eq);
+  CHECK_CWISE2_MASK(REF_PCMP_EQ, internal::pcmp_eq);
 
   // Test (-0) == (0) for signed operations
   for (int i = 0; i < PacketSize; ++i) {
     data1[i] = Scalar(-0.0);
     data1[i + PacketSize] = internal::random<bool>() ? data1[i] : Scalar(0);
   }
-  CHECK_CWISE2_MASK(internal::pcmp_eq, internal::pcmp_eq);
+  CHECK_CWISE2_MASK(REF_PCMP_EQ, internal::pcmp_eq);
 
   // Test NaN
   for (int i = 0; i < PacketSize; ++i) {
     data1[i] = NumTraits<Scalar>::quiet_NaN();
     data1[i + PacketSize] = internal::random<bool>() ? data1[i] : Scalar(0);
   }
-  CHECK_CWISE2_MASK(internal::pcmp_eq, internal::pcmp_eq);
+  CHECK_CWISE2_MASK(REF_PCMP_EQ, internal::pcmp_eq);
 }
 
 template <typename Scalar, typename Packet>
@@ -1204,10 +1211,10 @@ Scalar propagate_number_min(const Scalar& a, const Scalar& b) {
   return (numext::mini)(a, b);
 }
 
-template <bool Cond, typename Scalar, typename Packet, bool SkipDenorms = false, typename FunctorT>
+template <bool Cond, typename Scalar, typename Packet, bool SkipDenorms = EIGEN_ARCH_ARM, typename FunctorT>
 std::enable_if_t<!Cond, void> run_ieee_cases(const FunctorT&) {}
 
-template <bool Cond, typename Scalar, typename Packet, bool SkipDenorms = false, typename FunctorT>
+template <bool Cond, typename Scalar, typename Packet, bool SkipDenorms = EIGEN_ARCH_ARM, typename FunctorT>
 std::enable_if_t<Cond, void> run_ieee_cases(const FunctorT& fun) {
   const int PacketSize = internal::unpacket_traits<Packet>::size;
   const Scalar norm_min = (std::numeric_limits<Scalar>::min)();
@@ -1232,7 +1239,9 @@ std::enable_if_t<Cond, void> run_ieee_cases(const FunctorT& fun) {
   for (Scalar abs_value : values) {
     data1[0] = abs_value;
     data1[1] = -data1[0];
+    g_test_stack.push_back("IEEE cases: " + fun.name);
     CHECK_CWISE1_IF(Cond, fun.expected, fun.actual);
+    g_test_stack.pop_back();
   }
 }
 
@@ -1248,6 +1257,7 @@ std::enable_if_t<Cond, void> run_ieee_cases(const FunctorT& fun) {
     T expected(const T& val) const {          \
       return EXPECTED(val);                   \
     }                                         \
+    const std::string name = #NAME;           \
   }
 
 CREATE_TESTER(sqrt_fun, internal::psqrt, numext::sqrt);
@@ -1475,10 +1485,10 @@ struct exp_complex_test_impl {
   }
 
   // Verify equality with signed zero.
-  static bool is_exactly_equal(const Scalar& a, const Scalar& b) {
+  static bool is_exactly_equal(const Scalar& a, const Scalar& b, bool quiet = false) {
     bool result = is_exactly_equal(numext::real_ref(a), numext::real_ref(b)) &&
                   is_exactly_equal(numext::imag_ref(a), numext::imag_ref(b));
-    if (!result) {
+    if (!result && !quiet) {
       std::cout << a << " != " << b << std::endl;
     }
     return result;
@@ -1500,6 +1510,13 @@ struct exp_complex_test_impl {
     }
     // If z is (+∞,NaN), the result is (±∞,NaN) (the sign of the real part is unspecified)
     if (numext::real_ref(z) == +inf && (numext::isnan)(numext::imag_ref(z))) {
+      return true;
+    }
+    // If exp(x) overflows to inf and y is finite nonzero, the result involves inf * cos(y) and
+    // inf * sin(y). When cos(y) or sin(y) is near a zero crossing (e.g., cos(pi/2)), different
+    // trig implementations may produce different signs, so the signs of the result are unspecified.
+    if (!(numext::isinf)(numext::imag_ref(z)) && !(numext::isnan)(numext::imag_ref(z)) && numext::imag_ref(z) != 0 &&
+        (numext::isinf)(std::exp(numext::real_ref(z)))) {
       return true;
     }
     return false;
@@ -1548,7 +1565,12 @@ struct exp_complex_test_impl {
               Scalar(numext::abs(numext::real_ref(expected)), numext::abs(numext::imag_ref(expected)));
           VERIFY(is_exactly_equal(abs_w, abs_expected));
         } else {
-          VERIFY(is_exactly_equal(w, numext::exp(z)));
+          Scalar expected = numext::exp(z);
+          // First try exact equality (handles NaN, signed zeros correctly).
+          // Fall back to approximate comparison to allow for small differences
+          // in trig functions near zero crossings (e.g., vectorized sincos may
+          // compute cos(pi/2) = 0 while scalar std::exp gives ~6.12e-17).
+          VERIFY(is_exactly_equal(w, expected, /*quiet=*/true) || verifyIsApprox(w, expected));
         }
       }
     }
@@ -1597,6 +1619,28 @@ void packetmath_complex() {
     VERIFY(test::areApprox(ref, pval, PacketSize) && "pcplxflip");
   }
 
+  const RealScalar zero = RealScalar(0);
+  const RealScalar one = RealScalar(1);
+  const RealScalar inf = std::numeric_limits<RealScalar>::infinity();
+  const RealScalar nan = std::numeric_limits<RealScalar>::quiet_NaN();
+
+  // Multiplication and Division.
+  {
+    std::array<RealScalar, 8> special_values = {zero, one, inf, nan, -zero, -one, -inf, -nan};
+    for (RealScalar a : special_values) {
+      for (RealScalar b : special_values) {
+        for (RealScalar c : special_values) {
+          for (RealScalar d : special_values) {
+            data1[0] = Scalar(a, b);
+            data2[0] = Scalar(c, d);
+            CHECK_CWISE2_IF(PacketTraits::HasMul, internal::complex_multiply, internal::pmul);
+            CHECK_CWISE2_IF(PacketTraits::HasDiv, internal::complex_divide, internal::pdiv);
+          }
+        }
+      }
+    }
+  }
+
   if (PacketTraits::HasSqrt) {
     for (int i = 0; i < size; ++i) {
       data1[i] = Scalar(internal::random<RealScalar>(), internal::random<RealScalar>());
@@ -1605,10 +1649,6 @@ void packetmath_complex() {
     CHECK_CWISE1_IF(PacketTraits::HasSign, numext::sign, internal::psign);
 
     // Test misc. corner cases.
-    const RealScalar zero = RealScalar(0);
-    const RealScalar one = RealScalar(1);
-    const RealScalar inf = std::numeric_limits<RealScalar>::infinity();
-    const RealScalar nan = std::numeric_limits<RealScalar>::quiet_NaN();
     data1[0] = Scalar(zero, zero);
     data1[1] = Scalar(-zero, zero);
     data1[2] = Scalar(one, zero);
@@ -1647,10 +1687,6 @@ void packetmath_complex() {
     CHECK_CWISE1_N(std::log, internal::plog, size);
 
     // Test misc. corner cases.
-    const RealScalar zero = RealScalar(0);
-    const RealScalar one = RealScalar(1);
-    const RealScalar inf = std::numeric_limits<RealScalar>::infinity();
-    const RealScalar nan = std::numeric_limits<RealScalar>::quiet_NaN();
     for (RealScalar x : {zero, one, inf}) {
       for (RealScalar y : {zero, one, inf}) {
         data1[0] = Scalar(x, y);

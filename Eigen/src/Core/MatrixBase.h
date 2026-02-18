@@ -274,6 +274,17 @@ class MatrixBase : public DenseBase<Derived> {
                     const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
   bool isUnitary(const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
 
+  /* diagonalView */
+  template <int DiagIndex_ = 0>
+  EIGEN_DEVICE_FUNC DiagonalWrapper<Diagonal<Derived, DiagIndex_>> diagonalView();
+
+  template <int DiagIndex_ = 0>
+  EIGEN_DEVICE_FUNC DiagonalWrapper<Diagonal<const Derived, DiagIndex_>> diagonalView() const;
+
+  EIGEN_DEVICE_FUNC DiagonalWrapper<Diagonal<Derived, DynamicIndex>> diagonalView(Index index);
+
+  EIGEN_DEVICE_FUNC DiagonalWrapper<Diagonal<const Derived, DynamicIndex>> diagonalView(Index index) const;
+
   /** \returns true if each coefficients of \c *this and \a other are all exactly equal.
    * \warning When using floating point scalar values you probably should rather use a
    *          fuzzy comparison such as isApprox()
@@ -327,14 +338,14 @@ class MatrixBase : public DenseBase<Derived> {
   /////////// LU module ///////////
 
   template <typename PermutationIndex = DefaultPermutationIndex>
-  inline const FullPivLU<PlainObject, PermutationIndex> fullPivLu() const;
+  inline FullPivLU<PlainObject, PermutationIndex> fullPivLu() const;
   template <typename PermutationIndex = DefaultPermutationIndex>
-  inline const PartialPivLU<PlainObject, PermutationIndex> partialPivLu() const;
+  inline PartialPivLU<PlainObject, PermutationIndex> partialPivLu() const;
 
   template <typename PermutationIndex = DefaultPermutationIndex>
-  inline const PartialPivLU<PlainObject, PermutationIndex> lu() const;
+  inline PartialPivLU<PlainObject, PermutationIndex> lu() const;
 
-  EIGEN_DEVICE_FUNC inline const Inverse<Derived> inverse() const;
+  EIGEN_DEVICE_FUNC inline Inverse<Derived> inverse() const;
 
   template <typename ResultType>
   inline void computeInverseAndDetWithCheck(
@@ -350,18 +361,18 @@ class MatrixBase : public DenseBase<Derived> {
 
   /////////// Cholesky module ///////////
 
-  inline const LLT<PlainObject> llt() const;
-  inline const LDLT<PlainObject> ldlt() const;
+  inline LLT<PlainObject> llt() const;
+  inline LDLT<PlainObject> ldlt() const;
 
   /////////// QR module ///////////
 
-  inline const HouseholderQR<PlainObject> householderQr() const;
+  inline HouseholderQR<PlainObject> householderQr() const;
   template <typename PermutationIndex = DefaultPermutationIndex>
-  inline const ColPivHouseholderQR<PlainObject, PermutationIndex> colPivHouseholderQr() const;
+  inline ColPivHouseholderQR<PlainObject, PermutationIndex> colPivHouseholderQr() const;
   template <typename PermutationIndex = DefaultPermutationIndex>
-  inline const FullPivHouseholderQR<PlainObject, PermutationIndex> fullPivHouseholderQr() const;
+  inline FullPivHouseholderQR<PlainObject, PermutationIndex> fullPivHouseholderQr() const;
   template <typename PermutationIndex = DefaultPermutationIndex>
-  inline const CompleteOrthogonalDecomposition<PlainObject, PermutationIndex> completeOrthogonalDecomposition() const;
+  inline CompleteOrthogonalDecomposition<PlainObject, PermutationIndex> completeOrthogonalDecomposition() const;
 
   /////////// Eigenvalues module ///////////
 
