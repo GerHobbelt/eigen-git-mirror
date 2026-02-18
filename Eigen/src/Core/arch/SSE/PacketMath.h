@@ -218,10 +218,12 @@ struct packet_traits<double> : default_packet_traits {
     HasSin = EIGEN_FAST_MATH,
     HasCos = EIGEN_FAST_MATH,
     HasTanh = EIGEN_FAST_MATH,
-    HasLog = 1,
     HasErf = EIGEN_FAST_MATH,
     HasErfc = EIGEN_FAST_MATH,
+    HasLog = 1,
     HasExp = 1,
+    HasLog1p = 1,
+    HasExpm1 = 1,
     HasPow = 1,
     HasSqrt = 1,
     HasRsqrt = 1,
@@ -290,7 +292,6 @@ struct packet_traits<bool> : default_packet_traits {
     HasCmp = 1,
     HasShift = 0,
     HasAbs = 0,
-    HasAbs2 = 0,
     HasMin = 0,
     HasMax = 0,
     HasConj = 0,
@@ -1679,9 +1680,9 @@ EIGEN_STRONG_INLINE Packet16b pgather<bool, Packet16b>(const bool* from, Index s
 template <>
 EIGEN_STRONG_INLINE void pscatter<float, Packet4f>(float* to, const Packet4f& from, Index stride) {
   to[stride * 0] = pfirst(from);
-  to[stride * 1] = pfirst(_mm_shuffle_ps(from, from, 1));
-  to[stride * 2] = pfirst(_mm_shuffle_ps(from, from, 2));
-  to[stride * 3] = pfirst(_mm_shuffle_ps(from, from, 3));
+  to[stride * 1] = pfirst(Packet4f(_mm_shuffle_ps(from, from, 1)));
+  to[stride * 2] = pfirst(Packet4f(_mm_shuffle_ps(from, from, 2)));
+  to[stride * 3] = pfirst(Packet4f(_mm_shuffle_ps(from, from, 3)));
 }
 template <>
 EIGEN_STRONG_INLINE void pscatter<double, Packet2d>(double* to, const Packet2d& from, Index stride) {
@@ -2194,7 +2195,6 @@ struct packet_traits<Eigen::half> : default_packet_traits {
     HasDiv    = 1,
     HasNegate = 0,
     HasAbs    = 0,
-    HasAbs2   = 0,
     HasMin    = 0,
     HasMax    = 0,
     HasConj   = 0,
