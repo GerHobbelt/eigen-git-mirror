@@ -183,6 +183,7 @@ struct packet_traits<float> : default_packet_traits {
     HasReciprocal = EIGEN_FAST_MATH,
     HasSin = EIGEN_FAST_MATH,
     HasCos = EIGEN_FAST_MATH,
+    HasTan = EIGEN_FAST_MATH,
     HasACos = 1,
     HasASin = 1,
     HasATan = 1,
@@ -200,7 +201,6 @@ struct packet_traits<float> : default_packet_traits {
     HasTanh = EIGEN_FAST_MATH,
     HasErf = EIGEN_FAST_MATH,
     HasErfc = EIGEN_FAST_MATH,
-    HasBlend = 1,
     HasSign = 0  // The manually vectorized version is slightly slower for SSE.
   };
 };
@@ -217,6 +217,7 @@ struct packet_traits<double> : default_packet_traits {
     HasDiv = 1,
     HasSin = EIGEN_FAST_MATH,
     HasCos = EIGEN_FAST_MATH,
+    HasTan = EIGEN_FAST_MATH,
     HasTanh = EIGEN_FAST_MATH,
     HasErf = EIGEN_FAST_MATH,
     HasErfc = EIGEN_FAST_MATH,
@@ -230,7 +231,6 @@ struct packet_traits<double> : default_packet_traits {
     HasCbrt = 1,
     HasATan = 1,
     HasATanh = 1,
-    HasBlend = 1
   };
 };
 template <>
@@ -245,7 +245,6 @@ struct packet_traits<int> : default_packet_traits {
     HasCmp = 1,
     HasDiv = 1,
     HasShift = 1,
-    HasBlend = 1
   };
 };
 template <>
@@ -257,11 +256,9 @@ struct packet_traits<uint32_t> : default_packet_traits {
     AlignedOnScalar = 1,
     size = 4,
 
-    HasDiv = 0,
     HasNegate = 0,
     HasCmp = 1,
     HasShift = 1,
-    HasBlend = 1
   };
 };
 template <>
@@ -273,10 +270,8 @@ struct packet_traits<int64_t> : default_packet_traits {
     AlignedOnScalar = 1,
     size = 2,
 
-    HasDiv = 0,
     HasCmp = 1,
     HasShift = 1,
-    HasBlend = 1
   };
 };
 #endif
@@ -1997,44 +1992,6 @@ EIGEN_STRONG_INLINE void ptranspose(PacketBlock<Packet16b, 16>& kernel) {
   kernel.packet[13] = _mm_unpackhi_epi64(u6, ue);
   kernel.packet[14] = _mm_unpacklo_epi64(u7, uf);
   kernel.packet[15] = _mm_unpackhi_epi64(u7, uf);
-}
-
-EIGEN_STRONG_INLINE __m128i sse_blend_mask(const Selector<2>& ifPacket) {
-  return _mm_set_epi64x(0 - ifPacket.select[1], 0 - ifPacket.select[0]);
-}
-
-EIGEN_STRONG_INLINE __m128i sse_blend_mask(const Selector<4>& ifPacket) {
-  return _mm_set_epi32(0 - ifPacket.select[3], 0 - ifPacket.select[2], 0 - ifPacket.select[1], 0 - ifPacket.select[0]);
-}
-
-template <>
-EIGEN_STRONG_INLINE Packet2l pblend(const Selector<2>& ifPacket, const Packet2l& thenPacket,
-                                    const Packet2l& elsePacket) {
-  const __m128i true_mask = sse_blend_mask(ifPacket);
-  return pselect<Packet2l>(true_mask, thenPacket, elsePacket);
-}
-template <>
-EIGEN_STRONG_INLINE Packet4i pblend(const Selector<4>& ifPacket, const Packet4i& thenPacket,
-                                    const Packet4i& elsePacket) {
-  const __m128i true_mask = sse_blend_mask(ifPacket);
-  return pselect<Packet4i>(true_mask, thenPacket, elsePacket);
-}
-template <>
-EIGEN_STRONG_INLINE Packet4ui pblend(const Selector<4>& ifPacket, const Packet4ui& thenPacket,
-                                     const Packet4ui& elsePacket) {
-  return (Packet4ui)pblend(ifPacket, (Packet4i)thenPacket, (Packet4i)elsePacket);
-}
-template <>
-EIGEN_STRONG_INLINE Packet4f pblend(const Selector<4>& ifPacket, const Packet4f& thenPacket,
-                                    const Packet4f& elsePacket) {
-  const __m128i true_mask = sse_blend_mask(ifPacket);
-  return pselect<Packet4f>(_mm_castsi128_ps(true_mask), thenPacket, elsePacket);
-}
-template <>
-EIGEN_STRONG_INLINE Packet2d pblend(const Selector<2>& ifPacket, const Packet2d& thenPacket,
-                                    const Packet2d& elsePacket) {
-  const __m128i true_mask = sse_blend_mask(ifPacket);
-  return pselect<Packet2d>(_mm_castsi128_pd(true_mask), thenPacket, elsePacket);
 }
 
 // Scalar path for pmadd with FMA to ensure consistency with vectorized path.
