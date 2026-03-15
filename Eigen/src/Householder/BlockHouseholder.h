@@ -21,35 +21,6 @@ namespace Eigen {
 namespace internal {
 
 /** \internal */
-// template<typename TriangularFactorType,typename VectorsType,typename CoeffsType>
-// void make_block_householder_triangular_factor(TriangularFactorType& triFactor, const VectorsType& vectors, const
-// CoeffsType& hCoeffs)
-// {
-//   typedef typename VectorsType::Scalar Scalar;
-//   const Index nbVecs = vectors.cols();
-//   eigen_assert(triFactor.rows() == nbVecs && triFactor.cols() == nbVecs && vectors.rows()>=nbVecs);
-//
-//   for(Index i = 0; i < nbVecs; i++)
-//   {
-//     Index rs = vectors.rows() - i;
-//     // Warning, note that hCoeffs may alias with vectors.
-//     // It is then necessary to copy it before modifying vectors(i,i).
-//     typename CoeffsType::Scalar h = hCoeffs(i);
-//     // This hack permits to pass through nested Block<> and Transpose<> expressions.
-//     Scalar *Vii_ptr = const_cast<Scalar*>(vectors.data() + vectors.outerStride()*i + vectors.innerStride()*i);
-//     Scalar Vii = *Vii_ptr;
-//     *Vii_ptr = Scalar(1);
-//     triFactor.col(i).head(i).noalias() = -h * vectors.block(i, 0, rs, i).adjoint()
-//                                        * vectors.col(i).tail(rs);
-//     *Vii_ptr = Vii;
-//     // FIXME add .noalias() once the triangular product can work inplace
-//     triFactor.col(i).head(i) = triFactor.block(0,0,i,i).template triangularView<Upper>()
-//                              * triFactor.col(i).head(i);
-//     triFactor(i,i) = hCoeffs(i);
-//   }
-// }
-
-/** \internal */
 // This variant avoid modifications in vectors
 template <typename TriangularFactorType, typename VectorsType, typename CoeffsType>
 void make_block_householder_triangular_factor(TriangularFactorType& triFactor, const VectorsType& vectors,
@@ -65,7 +36,7 @@ void make_block_householder_triangular_factor(TriangularFactorType& triFactor, c
       triFactor.row(i).tail(rt).noalias() = -hCoeffs(i) * vectors.col(i).tail(rs).adjoint() *
                                             vectors.bottomRightCorner(rs, rt).template triangularView<UnitLower>();
 
-      // FIXME use the following line with .noalias() once the triangular product can work inplace
+      // FIXME: use the following line with .noalias() once triangular product supports in-place operation.
       // triFactor.row(i).tail(rt) = triFactor.row(i).tail(rt) * triFactor.bottomRightCorner(rt,rt).template
       // triangularView<Upper>();
       for (Index j = nbVecs - 1; j > i; --j) {
@@ -100,7 +71,7 @@ void apply_block_householder_on_the_left(MatrixType& mat, const VectorsType& vec
          (VectorsType::MaxColsAtCompileTime == 1 && MatrixType::MaxColsAtCompileTime != 1) ? RowMajor : ColMajor,
          VectorsType::MaxColsAtCompileTime, MatrixType::MaxColsAtCompileTime>
       tmp = V.adjoint() * mat;
-  // FIXME add .noalias() once the triangular product can work inplace
+  // FIXME: add .noalias() once triangular product supports in-place operation.
   if (forward)
     tmp = T.template triangularView<Upper>() * tmp;
   else

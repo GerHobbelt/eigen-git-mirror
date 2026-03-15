@@ -98,8 +98,6 @@ selfadjoint_matrix_vector_product<Scalar, Index, StorageOrder, UpLo, ConjugateLh
       t2 += cj1.pmul(A0[i], rhs[i]);
       t3 += cj1.pmul(A1[i], rhs[i]);
     }
-    // Yes this an optimization for gcc 4.3 and 4.4 (=> huge speed up)
-    // gcc 4.2 does this optimization automatically.
     const Scalar* EIGEN_RESTRICT a0It = A0 + alignedStart;
     const Scalar* EIGEN_RESTRICT a1It = A1 + alignedStart;
     const Scalar* EIGEN_RESTRICT rhsIt = rhs + alignedStart;
@@ -110,7 +108,7 @@ selfadjoint_matrix_vector_product<Scalar, Index, StorageOrder, UpLo, ConjugateLh
       Packet A1i = ploadu<Packet>(a1It);
       a1It += PacketSize;
       Packet Bi = ploadu<Packet>(rhsIt);
-      rhsIt += PacketSize;  // FIXME should be aligned in most cases
+      rhsIt += PacketSize;  // FIXME: should be aligned in most cases.
       Packet Xi = pload<Packet>(resIt);
 
       Xi = pcj0.pmadd(A0i, ptmp0, pcj0.pmadd(A1i, ptmp1, Xi));

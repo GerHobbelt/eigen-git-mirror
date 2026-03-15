@@ -35,18 +35,7 @@ namespace internal {
 #define EIGEN_ARCH_DEFAULT_NUMBER_OF_REGISTERS 32
 #endif
 
-#if 0
-#define EIGEN_MSA_DEBUG                                                             \
-  static bool firstTime = true;                                                     \
-  do {                                                                              \
-    if (firstTime) {                                                                \
-      std::cout << __FILE__ << ':' << __LINE__ << ':' << __FUNCTION__ << std::endl; \
-      firstTime = false;                                                            \
-    }                                                                               \
-  } while (0)
-#else
 #define EIGEN_MSA_DEBUG
-#endif
 
 #define EIGEN_MSA_SHF_I8(a, b, c, d) (((d) << 6) | ((c) << 4) | ((b) << 2) | (a))
 
@@ -81,7 +70,7 @@ struct packet_traits<float> : default_packet_traits {
     Vectorizable = 1,
     AlignedOnScalar = 1,
     size = 4,
-    // FIXME check the Has*
+    // FIXME: verify the Has* flags.
     HasDiv = 1,
     HasSin = EIGEN_FAST_MATH,
     HasCos = EIGEN_FAST_MATH,
@@ -102,7 +91,7 @@ struct packet_traits<int32_t> : default_packet_traits {
     Vectorizable = 1,
     AlignedOnScalar = 1,
     size = 4,
-    // FIXME check the Has*
+    // FIXME: verify the Has* flags.
     HasDiv = 1,
   };
 };
@@ -833,7 +822,7 @@ struct packet_traits<double> : default_packet_traits {
     Vectorizable = 1,
     AlignedOnScalar = 1,
     size = 2,
-    // FIXME check the Has*
+    // FIXME: verify the Has* flags.
     HasDiv = 1,
     HasExp = 1,
     HasSqrt = 1,

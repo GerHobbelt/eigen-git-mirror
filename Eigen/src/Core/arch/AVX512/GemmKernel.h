@@ -832,10 +832,6 @@ class gemm_class {
 
     // n-remainders.
     if (n & 4 && max_b_unroll > 4) nloop<a_unroll, 4, max_b_unroll>(aa, ao, bo, co1, co2);
-#if 0
-        if (n & 2 && max_b_unroll > 2) nloop<a_unroll, 2, max_b_unroll>(aa, ao, bo, co1, co2);
-        if (n & 1 && max_b_unroll > 1) nloop<a_unroll, 1, max_b_unroll>(aa, ao, bo, co1, co2);
-#else
     // Copy kernels don't support tails of n = 2 for single/double precision.
     // Loop over ones.
     int n_rem = 2 * ((n & 2) != 0) + 1 * ((n & 1) != 0);
@@ -843,7 +839,6 @@ class gemm_class {
       nloop<a_unroll, 1, max_b_unroll>(aa, ao, bo, co1, co2);
       n_rem--;
     }
-#endif
 
     // Advance A matrix pointer.
     a = ao + a_unroll * (a_stride - k - a_off);
@@ -1064,7 +1059,7 @@ EIGEN_DONT_INLINE void gemm_pack_rhs<Scalar, Index, DataMapper, 8, ColMajor, Con
       const LinearMapper dm3 = rhs.getLinearMapper(0, j2 + 3);
 
       Index k = 0;
-      if ((PacketSize % 4) == 0)  // TODO enable vectorized transposition for PacketSize==2 ??
+      if ((PacketSize % 4) == 0)  // TODO: enable vectorized transposition for PacketSize==2.
       {
         for (; k < peeled_k; k += PacketSize) {
           PacketBlock<Packet, (PacketSize % 4) == 0 ? 4 : PacketSize> kernel;

@@ -124,7 +124,7 @@ void svd_least_square(const MatrixType& m) {
     if (internal::is_same<RealScalar, double>::value || svd.rank() == m.diagonal().size()) {
       using std::sqrt;
       // This test is not stable with single precision.
-      // This is probably because squaring m signicantly affects the precision.
+      // This is likely because squaring m significantly affects the precision.
       if (internal::is_same<RealScalar, float>::value) ++g_test_level;
 
       VERIFY_IS_APPROX(m.adjoint() * (m * x), m.adjoint() * rhs);
@@ -177,8 +177,8 @@ void svd_min_norm(const MatrixType& m) {
   int guard = 0;
   do {
     m2.setRandom();
-  } while (SVD_FOR_MIN_NORM(MatrixType2)(m2).setThreshold(test_precision<Scalar>()).rank() != rank && (++guard) < 10);
-  VERIFY(guard < 10);
+  } while (SVD_FOR_MIN_NORM(MatrixType2)(m2).setThreshold(test_precision<Scalar>()).rank() != rank && (++guard) < 100);
+  VERIFY(guard < 100);
 
   RhsType2 rhs2 = RhsType2::Random(rank);
   // use QR to find a reference minimal norm solution

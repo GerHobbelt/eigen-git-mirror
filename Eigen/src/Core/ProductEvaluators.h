@@ -36,7 +36,7 @@ struct evaluator<Product<Lhs, Rhs, Options>> : public product_evaluator<Product<
 };
 
 // Catch "scalar * ( A * B )" and transform it to "(A*scalar) * B"
-// TODO we should apply that rule only if that's really helpful
+// TODO: we should apply that rule only if that's really helpful
 template <typename Lhs, typename Rhs, typename Scalar1, typename Scalar2, typename Plain1>
 struct evaluator_assume_aliasing<CwiseBinaryOp<internal::scalar_product_op<Scalar1, Scalar2>,
                                                const CwiseNullaryOp<internal::scalar_constant_op<Scalar1>, Plain1>,
@@ -161,7 +161,7 @@ struct Assignment<DstXprType, Product<Lhs, Rhs, Options>, internal::sub_assign_o
 };
 
 // Dense ?= scalar * Product
-// TODO we should apply that rule if that's really helpful
+// TODO: we should apply that rule if that's really helpful
 // for instance, this is not good for inner products
 template <typename DstXprType, typename Lhs, typename Rhs, typename AssignFunc, typename Scalar, typename ScalarBis,
           typename Plain>
@@ -182,7 +182,7 @@ struct Assignment<DstXprType,
 
 //----------------------------------------
 // Catch "Dense ?= xpr + Product<>" expression to save one temporary
-// FIXME we could probably enable these rules for any product, i.e., not only Dense and DefaultProduct
+// FIXME: consider enabling these rules for all product types, not only Dense and DefaultProduct.
 
 template <typename OtherXpr, typename Lhs, typename Rhs>
 struct evaluator_assume_aliasing<
@@ -237,17 +237,17 @@ template <typename Lhs, typename Rhs>
 struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, InnerProduct> {
   using impl = default_inner_product_impl<Lhs, Rhs, false>;
   template <typename Dst>
-  static EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void evalTo(Dst& dst, const Lhs& lhs, const Rhs& rhs) {
+  static EIGEN_DEVICE_FUNC constexpr EIGEN_STRONG_INLINE void evalTo(Dst& dst, const Lhs& lhs, const Rhs& rhs) {
     dst.coeffRef(0, 0) = impl::run(lhs, rhs);
   }
 
   template <typename Dst>
-  static EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void addTo(Dst& dst, const Lhs& lhs, const Rhs& rhs) {
+  static EIGEN_DEVICE_FUNC constexpr EIGEN_STRONG_INLINE void addTo(Dst& dst, const Lhs& lhs, const Rhs& rhs) {
     dst.coeffRef(0, 0) += impl::run(lhs, rhs);
   }
 
   template <typename Dst>
-  static EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void subTo(Dst& dst, const Lhs& lhs, const Rhs& rhs) {
+  static EIGEN_DEVICE_FUNC constexpr EIGEN_STRONG_INLINE void subTo(Dst& dst, const Lhs& lhs, const Rhs& rhs) {
     dst.coeffRef(0, 0) -= impl::run(lhs, rhs);
   }
 };
@@ -286,7 +286,7 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, OuterProduct> {
   struct is_row_major : bool_constant<(int(T::Flags) & RowMajorBit)> {};
   typedef typename Product<Lhs, Rhs>::Scalar Scalar;
 
-  // TODO it would be nice to be able to exploit our *_assign_op functors for that purpose
+  // TODO: it would be nice to be able to exploit our *_assign_op functors for that purpose
   struct set {
     template <typename Dst, typename Src>
     EIGEN_DEVICE_FUNC void operator()(const Dst& dst, const Src& src) const {
@@ -500,18 +500,6 @@ struct product_evaluator<Product<Lhs, Rhs, LazyProduct>, ProductTag, DenseShape,
     EIGEN_INTERNAL_CHECK_COST_VALUE(NumTraits<Scalar>::MulCost);
     EIGEN_INTERNAL_CHECK_COST_VALUE(NumTraits<Scalar>::AddCost);
     EIGEN_INTERNAL_CHECK_COST_VALUE(CoeffReadCost);
-#if 0
-    std::cerr << "LhsOuterStrideBytes=  " << LhsOuterStrideBytes << "\n";
-    std::cerr << "RhsOuterStrideBytes=  " << RhsOuterStrideBytes << "\n";
-    std::cerr << "LhsAlignment=         " << LhsAlignment << "\n";
-    std::cerr << "RhsAlignment=         " << RhsAlignment << "\n";
-    std::cerr << "CanVectorizeLhs=      " << CanVectorizeLhs << "\n";
-    std::cerr << "CanVectorizeRhs=      " << CanVectorizeRhs << "\n";
-    std::cerr << "CanVectorizeInner=    " << CanVectorizeInner << "\n";
-    std::cerr << "EvalToRowMajor=       " << EvalToRowMajor << "\n";
-    std::cerr << "Alignment=            " << Alignment << "\n";
-    std::cerr << "Flags=                " << Flags << "\n";
-#endif
   }
 
   // Everything below here is taken from CoeffBasedProduct.h
@@ -575,7 +563,7 @@ struct product_evaluator<Product<Lhs, Rhs, LazyProduct>, ProductTag, DenseShape,
 
     Flags = ((int(LhsFlags) | int(RhsFlags)) & HereditaryBits & ~RowMajorBit) |
             (EvalToRowMajor ? RowMajorBit : 0)
-            // TODO enable vectorization for mixed types
+            // TODO: enable vectorization for mixed types
             | (SameType && (CanVectorizeLhs || CanVectorizeRhs) ? PacketAccessBit : 0) |
             (XprType::IsVectorAtCompileTime ? LinearAccessBit : 0),
 
@@ -604,7 +592,7 @@ struct product_evaluator<Product<Lhs, Rhs, LazyProduct>, ProductTag, DenseShape,
                         (int(InnerSize) % packet_traits<Scalar>::size == 0)
   };
 
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE const CoeffReturnType coeff(Index row, Index col) const {
+  EIGEN_DEVICE_FUNC constexpr EIGEN_STRONG_INLINE const CoeffReturnType coeff(Index row, Index col) const {
     return (m_lhs.row(row).transpose().cwiseProduct(m_rhs.col(col))).sum();
   }
 
@@ -612,7 +600,7 @@ struct product_evaluator<Product<Lhs, Rhs, LazyProduct>, ProductTag, DenseShape,
    * which is why we don't set the LinearAccessBit.
    * TODO: this seems possible when the result is a vector
    */
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE const CoeffReturnType coeff(Index index) const {
+  EIGEN_DEVICE_FUNC constexpr EIGEN_STRONG_INLINE const CoeffReturnType coeff(Index index) const {
     const Index row = (RowsAtCompileTime == 1 || MaxRowsAtCompileTime == 1) ? 0 : index;
     const Index col = (RowsAtCompileTime == 1 || MaxRowsAtCompileTime == 1) ? index : 0;
     return (m_lhs.row(row).transpose().cwiseProduct(m_rhs.col(col))).sum();
@@ -717,8 +705,8 @@ struct etor_product_packet_impl<ColMajor, UnrollingIndex, Lhs, Rhs, Packet, Load
 
 template <typename Lhs, typename Rhs, typename Packet, int LoadMode>
 struct etor_product_packet_impl<RowMajor, 1, Lhs, Rhs, Packet, LoadMode> {
-  static EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void run(Index row, Index col, const Lhs& lhs, const Rhs& rhs,
-                                                        Index /*innerDim*/, Packet& res) {
+  static EIGEN_DEVICE_FUNC constexpr EIGEN_STRONG_INLINE void run(Index row, Index col, const Lhs& lhs, const Rhs& rhs,
+                                                                  Index /*innerDim*/, Packet& res) {
     res = pmul(pset1<Packet>(lhs.coeff(row, Index(0))), rhs.template packet<LoadMode, Packet>(Index(0), col));
   }
   static EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void run_segment(Index row, Index col, const Lhs& lhs, const Rhs& rhs,
@@ -731,8 +719,8 @@ struct etor_product_packet_impl<RowMajor, 1, Lhs, Rhs, Packet, LoadMode> {
 
 template <typename Lhs, typename Rhs, typename Packet, int LoadMode>
 struct etor_product_packet_impl<ColMajor, 1, Lhs, Rhs, Packet, LoadMode> {
-  static EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void run(Index row, Index col, const Lhs& lhs, const Rhs& rhs,
-                                                        Index /*innerDim*/, Packet& res) {
+  static EIGEN_DEVICE_FUNC constexpr EIGEN_STRONG_INLINE void run(Index row, Index col, const Lhs& lhs, const Rhs& rhs,
+                                                                  Index /*innerDim*/, Packet& res) {
     res = pmul(lhs.template packet<LoadMode, Packet>(row, Index(0)), pset1<Packet>(rhs.coeff(Index(0), col)));
   }
   static EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void run_segment(Index row, Index col, const Lhs& lhs, const Rhs& rhs,
@@ -913,7 +901,7 @@ struct diagonal_product_evaluator_base : evaluator_base<Derived> {
     EIGEN_INTERNAL_CHECK_COST_VALUE(CoeffReadCost);
   }
 
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE const Scalar coeff(Index idx) const {
+  EIGEN_DEVICE_FUNC constexpr EIGEN_STRONG_INLINE const Scalar coeff(Index idx) const {
     if (AsScalarProduct)
       return m_diagImpl.coeff(0) * m_matImpl.coeff(idx);
     else
@@ -983,9 +971,9 @@ struct product_evaluator<Product<Lhs, Rhs, ProductKind>, ProductTag, DiagonalSha
   static constexpr int StorageOrder = Base::StorageOrder_;
   using IsRowMajor_t = bool_constant<StorageOrder == RowMajor>;
 
-  EIGEN_DEVICE_FUNC explicit product_evaluator(const XprType& xpr) : Base(xpr.rhs(), xpr.lhs().diagonal()) {}
+  EIGEN_DEVICE_FUNC constexpr explicit product_evaluator(const XprType& xpr) : Base(xpr.rhs(), xpr.lhs().diagonal()) {}
 
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE const Scalar coeff(Index row, Index col) const {
+  EIGEN_DEVICE_FUNC constexpr EIGEN_STRONG_INLINE const Scalar coeff(Index row, Index col) const {
     return m_diagImpl.coeff(row) * m_matImpl.coeff(row, col);
   }
 
@@ -1037,9 +1025,9 @@ struct product_evaluator<Product<Lhs, Rhs, ProductKind>, ProductTag, DenseShape,
   static constexpr int StorageOrder = Base::StorageOrder_;
   using IsColMajor_t = bool_constant<StorageOrder == ColMajor>;
 
-  EIGEN_DEVICE_FUNC explicit product_evaluator(const XprType& xpr) : Base(xpr.lhs(), xpr.rhs().diagonal()) {}
+  EIGEN_DEVICE_FUNC constexpr explicit product_evaluator(const XprType& xpr) : Base(xpr.lhs(), xpr.rhs().diagonal()) {}
 
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE const Scalar coeff(Index row, Index col) const {
+  EIGEN_DEVICE_FUNC constexpr EIGEN_STRONG_INLINE const Scalar coeff(Index row, Index col) const {
     return m_matImpl.coeff(row, col) * m_diagImpl.coeff(col);
   }
 
@@ -1170,7 +1158,7 @@ struct generic_product_impl<Lhs, Inverse<Rhs>, MatrixShape, PermutationShape, Pr
  * Products with transpositions matrices
  ***************************************************************************/
 
-// FIXME could we unify Transpositions and Permutation into a single "shape"??
+// FIXME: consider unifying Transpositions and Permutation into a single shape.
 
 /** \internal
  * \class transposition_matrix_product

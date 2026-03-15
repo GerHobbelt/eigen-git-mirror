@@ -186,6 +186,17 @@ ei_add_test(mixingtypes)
 ei_add_test(float_conversion)
 ei_add_test(io)
 ei_add_test(packetmath "-DEIGEN_FAST_MATH=1")
+# Generic clang vector backend tests for different vector sizes.
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("
+  typedef float v4sf __attribute__((ext_vector_type(4)));
+  int main() { return __builtin_vectorelements(v4sf{}); }
+" COMPILER_SUPPORTS_VECTOR_EXTENSIONS)
+if(COMPILER_SUPPORTS_VECTOR_EXTENSIONS)
+  ei_add_test(packetmath_generic_16 "-DEIGEN_FAST_MATH=1")
+  ei_add_test(packetmath_generic_32 "-DEIGEN_FAST_MATH=1")
+  ei_add_test(packetmath_generic_64 "-DEIGEN_FAST_MATH=1")
+endif()
 ei_add_test(packet_segment)
 ei_add_test(vectorization_logic)
 ei_add_test(basicstuff)
@@ -336,6 +347,12 @@ else()
     set(EIGEN_FASTMATH_FLAGS "/fp:fast")
   endif()
 endif()
+# The fastmath test intentionally uses NaN/infinity under -ffast-math.
+# Suppress the clang warning about this being technically undefined.
+check_cxx_compiler_flag("-Wno-nan-infinity-disabled" COMPILER_SUPPORT_WNO_NAN_INF)
+if(COMPILER_SUPPORT_WNO_NAN_INF)
+  set(EIGEN_FASTMATH_FLAGS "${EIGEN_FASTMATH_FLAGS} -Wno-nan-infinity-disabled")
+endif()
 
 ei_add_test(fastmath "${EIGEN_FASTMATH_FLAGS}")
 
@@ -401,9 +418,14 @@ endif()
 # CUDA unit tests
 option(EIGEN_TEST_CUDA "Enable CUDA support in unit tests" OFF)
 option(EIGEN_TEST_CUDA_CLANG "Use clang instead of nvcc to compile the CUDA tests" OFF)
+option(EIGEN_TEST_CUDA_NVC "Use nvc++ (NVHPC) instead of nvcc to compile the CUDA tests" OFF)
 
 if(EIGEN_TEST_CUDA_CLANG AND NOT CMAKE_CXX_COMPILER MATCHES "clang")
   message(WARNING "EIGEN_TEST_CUDA_CLANG is set, but CMAKE_CXX_COMPILER does not appear to be clang.")
+endif()
+
+if(EIGEN_TEST_CUDA_NVC AND NOT CMAKE_CXX_COMPILER_ID MATCHES "NVHPC")
+  message(WARNING "EIGEN_TEST_CUDA_NVC is set, but CMAKE_CXX_COMPILER does not appear to be nvc++.")
 endif()
 
 find_package(CUDA 9.0)
@@ -420,6 +442,12 @@ if(CUDA_FOUND AND EIGEN_TEST_CUDA)
     string(APPEND CMAKE_CXX_FLAGS " --cuda-path=${CUDA_TOOLKIT_ROOT_DIR}")
     foreach(GPU IN LISTS EIGEN_CUDA_COMPUTE_ARCH)
       string(APPEND CMAKE_CXX_FLAGS " --cuda-gpu-arch=sm_${GPU}")
+    endforeach()
+    string(APPEND CMAKE_CXX_FLAGS " ${EIGEN_CUDA_CXX_FLAGS}")
+  elseif(EIGEN_TEST_CUDA_NVC)
+    string(APPEND CMAKE_CXX_FLAGS " -cuda")
+    foreach(GPU IN LISTS EIGEN_CUDA_COMPUTE_ARCH)
+      string(APPEND CMAKE_CXX_FLAGS " -gpu=cc${GPU}")
     endforeach()
     string(APPEND CMAKE_CXX_FLAGS " ${EIGEN_CUDA_CXX_FLAGS}")
   else()
